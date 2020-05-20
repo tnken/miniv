@@ -1,0 +1,6 @@
+main
+tinyv
+*.so
+*.dll
+tmp.*
+tmp
