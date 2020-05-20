@@ -5,10 +5,10 @@ fn main(){
 		println('error: argument is missing')
 		return
 	}
+	arg := os.args[1]
 
-	println('.intel_syntax noprefix')
 	println('.global main')
   println('main:')
-  println('mov rax, ' + os.args[1])
+  println('movq $$arg, %rax')
   println('ret')
 }
