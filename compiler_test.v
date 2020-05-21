@@ -16,15 +16,33 @@ fn compile(source string) int {
 	return res.exit_code
 }
 
-fn test_compiler() {
+struct Case {
+	input string
+	expected int
+}
+
+fn display_result(idx int, ok bool) {
+	if ok {
+		println('[ok]: ${idx}')
+	} else {
+		println('[faile]: ${idx}')
+	}
+}
+
+fn test_calculation() {
 	cases := [
-		[1, 1],
-		[2, 2],
-		[3, 3],
-		[4, 4]
+		Case{'2', 2},
+		Case{'1+0', 1},
+		Case{'1-1', 0},
+		Case{'3-2+3', 4},
+		Case{'3+3-4', 2},
+		Case{'3+3-4+3', 5},
 	]
 
-	for c in cases {
-		assert compile(c[0].str()) == c[1]
+	for idx, c in cases {
+		expected := c.expected
+		output := compile(c.input)
+		assert expected == output
+		display_result(idx, expected == output)
 	}
 }
