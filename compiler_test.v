@@ -16,17 +16,17 @@ fn compile(source string) int {
 	return res.exit_code
 }
 
-struct Case {
-	input string
-	expected int
-}
-
 fn display_result(idx int, ok bool) {
 	if ok {
 		println('[ok]: ${idx}')
 	} else {
 		println('[faile]: ${idx}')
 	}
+}
+
+struct Case {
+	input string
+	expected int
 }
 
 fn test_calculation() {
