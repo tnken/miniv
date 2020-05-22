@@ -54,17 +54,26 @@ fn (p &Parser) expr() &Node {
 }
 
 fn (p &Parser) mul() &Node {
-	node := p.primary()
+	node := p.unary()
 
 	for {
 		if p.token.consume('*') {
-			node = new_node(.mul, node, p.primary())
+			node = new_node(.mul, node, p.unary())
 		} else if p.token.consume('/'){
-			node = new_node(.div, node, p.primary())
+			node = new_node(.div, node, p.unary())
 		} else {
 			return node
 		}
 	}
+}
+
+fn (p &Parser) unary() &Node {
+	if p.token.consume('+'){
+		return p.primary()
+	} else if p.token.consume('-'){
+		return new_node(.sub, new_node_num(0), p.primary())
+	}
+	return p.primary()
 }
 
 fn (p &Parser) primary() &Node {
