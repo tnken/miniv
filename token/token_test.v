@@ -21,7 +21,9 @@ fn test_tokenizer() {
     '1-1',
     '1000+100000-1',
     ' 1000  + 100000 - 1  ',
-    '(1+1) * 3'
+    '(1+1) * 3',
+    '3==3',
+    '5>=3',
   ]
 
   expecting := [
@@ -64,6 +66,18 @@ fn test_tokenizer() {
       ExpectToken{.num, 1, ''},
       ExpectToken{.reserved, 0, ')'},
       ExpectToken{.reserved, 0, '*'},
+      ExpectToken{.num, 3, ''},
+      ExpectToken{.eof}
+    ],
+    [
+      ExpectToken{.num, 3, ''},
+      ExpectToken{.reserved, 0, '=='},
+      ExpectToken{.num, 3, ''},
+      ExpectToken{.eof}
+    ],
+    [
+      ExpectToken{.num, 5, ''},
+      ExpectToken{.reserved, 0, '>='},
       ExpectToken{.num, 3, ''},
       ExpectToken{.eof}
     ]

@@ -22,6 +22,22 @@ pub fn gen(node parser.Node) {
   } else if node.kind == .div {
     println('  cqo')
     println('  idiv %rdi')
+  } else if node.kind == .eq {
+    println('  cmp %rdi, %rax')
+    println('  sete %al')
+    println('  movzb %al, %rax')
+  } else if node.kind == .ne {
+    println('  cmp %rdi, %rax')
+    println('  setne %al')
+    println('  movzb %al, %rax')
+  } else if node.kind == .lt {
+    println('  cmp %rdi, %rax')
+    println('  setl %al')
+    println('  movzb %al, %rax')
+  } else if node.kind == .le {
+    println('  cmp %rdi, %rax')
+    println('  setle %al')
+    println('  movzb %al, %rax')
   }
 
   println('  push %rax')

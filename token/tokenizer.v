@@ -30,8 +30,8 @@ fn (s &Scanner) skip_whitespace() {
   }
 }
 
-fn (mut s Scanner) scan_advance() {
-  s.pos++
+fn (mut s Scanner) scan_advance(i int) {
+  s.pos += i
   if s.pos < s.input.len {
     s.ch = s.input[s.pos]
   }
@@ -113,9 +113,24 @@ pub fn tokenize(input string) &Token{
   for sc.pos < sc.input.len {
     sc.skip_whitespace()
 
-    if sc.ch.str() in '+-*/()' {
+    if sc.pos < sc.input.len-1 {
+      target := sc.input[sc.pos..sc.pos+2]
+      if  target == '==' || target == '!=' {
+        cur = new_token(.reserved, cur, target)
+        sc.scan_advance(2)
+        continue
+      }
+
+      if target == '<=' || target == '>=' {
+        cur = new_token(.reserved, cur, target)
+        sc.scan_advance(2)
+        continue
+      }
+    }
+
+    if sc.ch.str() in '+-*/()<>' {
       cur = new_token(.reserved, cur, sc.ch.str())
-      sc.scan_advance()
+      sc.scan_advance(1)
       continue
     }
 
