@@ -11,13 +11,10 @@ fn main(){
     return
   }
   tok := token.tokenize(os.args[1])
-  println('.global main')
-  println('main:')
-
   p := parser.new_parser(tok)
   node := p.parse()
-  codegen.gen(node)
 
-  println('  pop %rax')
-  println('  ret')
+  codegen.init()
+  codegen.gen(node)
+  codegen.end()
 }

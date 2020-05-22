@@ -1,6 +1,16 @@
 module codegen
 import parser
 
+pub fn init() {
+  println('.global main')
+  println('main:')
+}
+
+pub fn end() {
+  println('  pop %rax')
+  println('  ret')
+}
+
 pub fn gen(node parser.Node) {
   if node.kind == .num {
     println('  push $$node.val')
