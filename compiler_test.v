@@ -1,7 +1,7 @@
 import os
 
 fn compile(source string) int {
-	os.exec('./tinyv $source > tmp.s') or {
+	os.exec('./tinyv \'$source\' > tmp.s') or {
 		println('error: compile error')
 		panic(err)
 	}
@@ -37,6 +37,12 @@ fn test_calculation() {
 		Case{'3-2+3', 4},
 		Case{'3+3-4', 2},
 		Case{'3+3-4+3', 5},
+		Case{'1*2', 2},
+		Case{'4/2', 2},
+		Case{'(1+1)*5', 10},
+		Case{'(2+2)/2', 2},
+		Case{'10-(3+3)', 4},
+		Case{'6/2+3*(2+5/(1+6))-2', 7}
 	]
 
 	for idx, c in cases {

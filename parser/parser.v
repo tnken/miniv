@@ -18,7 +18,7 @@ struct Node {
 	rhs &Node
 }
 
-struct Parser {
+pub struct Parser {
 	pub mut:
 	token token.Token
 }
@@ -27,7 +27,7 @@ pub fn new_parser(tk token.Token) &Parser {
 	return &Parser{tk}
 }
 
-fn (p &Parser) parse() &Node {
+pub fn (p &Parser) parse() &Node {
   return p.expr()
 }
 
