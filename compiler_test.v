@@ -26,7 +26,7 @@ fn display_result(idx int, ok bool) {
 
 struct Case {
 	input string
-	expected int
+	expecting int
 }
 
 fn test_calculation() {
@@ -40,7 +40,7 @@ fn test_calculation() {
 	]
 
 	for idx, c in cases {
-		expected := c.expected
+		expected := c.expecting
 		output := compile(c.input)
 		assert expected == output
 		display_result(idx, expected == output)

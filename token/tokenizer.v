@@ -15,11 +15,19 @@ fn new_scanner(input string) &Scanner{
 	}
 }
 
-fn (mut s Scanner) skip_whitespace() {
-	for s.ch.is_space() && s.pos < s.input.len {
+fn (s &Scanner) skip_whitespace() {
+	for s.input[s.pos].is_space() {
 		s.pos++
+		if s.pos == s.input.len {
+			break
+		}
 	}
-	s.ch = s.input[s.pos]
+
+	if s.pos < s.input.len {
+		s.ch = s.input[s.pos]
+	} else {
+		s.ch = ` `
+	}
 }
 
 fn (mut s Scanner) scan_advance() {
@@ -40,7 +48,7 @@ fn (mut s Scanner) scan_num() int {
 	return s.input[start..s.pos].int()
 }
 
-enum TokenKind {
+pub enum TokenKind {
 	reserved
 	num
 	eof
@@ -73,10 +81,9 @@ pub fn (t &Token) consume(op string) bool {
 
 pub fn (t &Token) expect_number() int {
 	if t.token_kind != .num {
-		// TODO: エラー処理
+		// TODO: error handling
 		println('error: not number')
 	}
-		// println(op)
 	val := t.val
 	return val
 }
@@ -85,9 +92,10 @@ pub fn tokenize(input string) &Token{
 	head := &Token{next: 0}
 	cur := head
 	mut sc := new_scanner(input)
-	sc.skip_whitespace()
 
 	for sc.pos < sc.input.len {
+		sc.skip_whitespace()
+
 		if sc.ch == `+` || sc.ch == `-` {
 			cur = new_token(.reserved, cur, sc.ch.str())
 			sc.scan_advance()
