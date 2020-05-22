@@ -56,15 +56,23 @@ pub enum TokenKind {
 
 struct Token {
 	pub mut:
-		token_kind TokenKind
+		kind TokenKind
 	  next &Token
 		val int
 		str string
 }
 
+fn (t &Token) next_token() {
+	next := t.next
+	t.kind = next.kind
+	t.val = next.val
+	t.str = next.str
+	t.next = next.next
+}
+
 fn new_token(kind TokenKind, cur &Token, str string) &Token {
 	token := &Token{
-		token_kind: kind,
+		kind: kind,
 		str: str,
 		next: 0
 	}
@@ -73,18 +81,26 @@ fn new_token(kind TokenKind, cur &Token, str string) &Token {
 }
 
 pub fn (t &Token) consume(op string) bool {
-	if t.token_kind != .reserved || t.str != op {
+	if t.kind != .reserved || t.str != op {
 		return false
 	}
+	t.next_token()
 	return true
 }
 
+pub fn (t &Token) expect(op string) {
+	if t.kind != .reserved || t.str != op {
+		panic('error: not expected operator')
+	}
+	t.next_token()
+}
+
 pub fn (t &Token) expect_number() int {
-	if t.token_kind != .num {
-		// TODO: error handling
-		println('error: not number')
+	if t.kind != .num {
+		panic('error: not expected operator')
 	}
 	val := t.val
+	t.next_token()
 	return val
 }
 
@@ -96,7 +112,7 @@ pub fn tokenize(input string) &Token{
 	for sc.pos < sc.input.len {
 		sc.skip_whitespace()
 
-		if sc.ch == `+` || sc.ch == `-` {
+		if sc.ch.str() in '+-*/()' {
 			cur = new_token(.reserved, cur, sc.ch.str())
 			sc.scan_advance()
 			continue

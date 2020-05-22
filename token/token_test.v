@@ -62,11 +62,11 @@ fn test_tokenizer() {
 		mut tk := token.tokenize(s)
 		mut i := 0
 
-		for tk.token_kind != .eof {
+		for tk.kind != .eof {
 			expected := expecting[idx][i++]
 
-			assert expected.kind == tk.token_kind
-			display_result(idx, expected.kind == tk.token_kind)
+			assert expected.kind == tk.kind
+			display_result(idx, expected.kind == tk.kind)
 
 			if expected.kind == .num {
 				assert expected.val == tk.val

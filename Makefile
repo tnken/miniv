@@ -1,10 +1,13 @@
-tinyv: tinyv.v
-			v tinyv.v
+VCMD=v
+VTEST=$(VCMD) -stats test
 
-test: tinyv
-			v -stats test .
-
+build:
+			$(VCMD) tinyv.v
+test:
+			$(VTEST) .
 clean:
-				rm -f tinyv *~ tmp*
+			rm -f tinyv *~ tmp*
+fmt:
+			$(VCMD) fmt ./*.v ./*/*.v
 
-.PHONY: test clean
+.PHONY: test clean build fmt
