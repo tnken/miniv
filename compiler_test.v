@@ -72,7 +72,6 @@ fn test_calculation() {
     Case{'0 <= 1', 1},
     Case{'1 <= 0', 0},
     Case{'0 <= 0', 1},
-    Case{'c:=3', 3}
   ]
 
   for idx, c in cases {
@@ -86,8 +85,11 @@ fn test_calculation() {
 fn test_lvar() {
   cases := [
     Case{'a:=1', 1},
-    Case{'a:=1 b:=1 c:=b-a 0', 0}
-    Case{'a:=1 b:=2 c:=3 a+b+c', 6}
+    Case{'a:=2 b:=1 c:=a-b', 1},
+    Case{'a:=2 b:=1 c:=a-b 0', 0},
+    Case{'a:=1 b:=2 c:=3 a+b+c', 6},
+    Case{'hoge := 1 fuga := 2 hoge+fuga', 3},
+    Case{'hoge := 1 fuga := 2 vv := fuga-hoge (hoge+fuga)*2-vv', 5}
   ]
 
    for idx, c in cases {

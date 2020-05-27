@@ -1,7 +1,7 @@
 module codegen
 import parser
 
-pub fn ini() {
+fn ini() {
   println('.global main')
   println('main:')
   println('  push %rbp')
@@ -9,34 +9,52 @@ pub fn ini() {
   println('  sub $208, %rsp')
 }
 
-pub fn end() {
+fn end() {
   println('  mov %rbp, %rsp')
   println('  pop %rbp')
   println('  ret')
 }
 
-fn gen_lvar(node parser.Node) {
+pub fn gen_program(p &parser.Parser) {
+  ini()
+  cg := Cgen{p}
+  for node in p.program {
+    cg.gen(node)
+    println('  pop %rax')
+  }
+  end()
+}
+
+struct Cgen {
+  p parser.Parser
+}
+
+fn (cg Cgen) gen_lvar(node parser.Node) {
+  if node.kind != .lvar {
+    panic('Error: Not local variable')
+  }
   println('  mov %rbp, %rax')
-  println('  sub $$node.offset, %rax')
+  offset := cg.p.find_lvar(node.str).offset
+  println('  sub $$offset, %rax')
   println('  push %rax')
 }
 
-pub fn gen(node parser.Node) {
+fn (cg Cgen) gen(node parser.Node) {
   match node.kind {
     .num {
       println('  push $$node.val')
       return
     }
     .lvar {
-      gen_lvar(node)
+      cg.gen_lvar(node)
       println('  pop %rax')
       println('  mov (%rax), %rax')
       println('  push %rax')
       return
     }
     .assign {
-      gen_lvar(node.lhs)
-      gen(node.rhs)
+      cg.gen_lvar(node.lhs)
+      cg.gen(node.rhs)
       println('  pop %rdi')
       println('  pop %rax')
       println('  mov %rdi, (%rax)')
@@ -45,8 +63,8 @@ pub fn gen(node parser.Node) {
     } else {}
   }
 
-  gen(node.lhs)
-  gen(node.rhs)
+  cg.gen(node.lhs)
+  cg.gen(node.rhs)
 
   println('  pop %rdi')
   println('  pop %rax')

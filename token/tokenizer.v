@@ -15,11 +15,11 @@ fn new_scanner(input string) &Scanner{
   }
 }
 
-fn (s &Scanner) skip_whitespace() {
+fn (s &Scanner) skip_whitespace() bool {
   for s.input[s.pos].is_space() {
     s.pos++
     if s.pos == s.input.len {
-      break
+      return false
     }
   }
 
@@ -28,13 +28,17 @@ fn (s &Scanner) skip_whitespace() {
   } else {
     s.ch = ` `
   }
+  return true
 }
 
-fn (mut s Scanner) scan_advance(i int) {
+fn (mut s Scanner) scan_advance(i int) bool{
   s.pos += i
   if s.pos < s.input.len {
     s.ch = s.input[s.pos]
+  } else {
+    return false
   }
+  return true
 }
 
 fn (mut s Scanner) scan_num() int {
@@ -121,7 +125,9 @@ pub fn tokenize(input string) &Token{
   mut sc := new_scanner(input)
 
   for sc.pos < sc.input.len {
-    sc.skip_whitespace()
+    if !sc.skip_whitespace() {
+      continue
+    }
 
     if sc.pos < sc.input.len-1 {
       target := sc.input[sc.pos..sc.pos+2]
@@ -150,17 +156,20 @@ pub fn tokenize(input string) &Token{
       continue
     }
 
-    if `a` <= sc.ch && sc.ch <= `z` {
-      cur = new_token(.ident, cur, sc.ch.str())
-      sc.scan_advance(1)
-      continue
-    }
-
     if sc.ch.is_digit() {
       cur = new_token(.num, cur, '')
       cur.val = sc.scan_num()
       continue
     }
+
+    if sc.ch.is_letter() {
+      l := sc.pos
+      for sc.ch.is_letter() && sc.scan_advance(1) {}
+      cur = new_token(.ident, cur, sc.input[l..sc.pos])
+      continue
+    }
+
+    panic('Syntax Error: undefined token')
   }
   new_token(.eof, cur, '0')
   return head.next

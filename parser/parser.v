@@ -26,6 +26,29 @@ struct Node {
   offset int
 }
 
+struct Lvar {
+  pub mut:
+  name string
+  offset int
+  next &Lvar
+}
+
+fn new_lvar(name string, offset int) &Lvar {
+  return &Lvar{name, offset, 0}
+}
+
+pub fn (p &Parser) find_lvar(name string) &Lvar {
+  mut l := p.head_lvar
+  for {
+    if l.name == name {
+      return l
+    }
+    if l.next == 0 {break}
+    l = l.next
+  }
+  return 0
+}
+
 pub fn (n Node) string() string {
   if n.kind == .num {
     return n.val.str()
@@ -37,14 +60,18 @@ pub fn (n Node) string() string {
 pub struct Parser {
   pub mut:
   token token.Token
+  program []&Node
+  head_lvar &Lvar
+  tail_lvar &Lvar
 }
 
 pub fn new_parser(tk token.Token) &Parser {
-  return &Parser{tk}
+  l := &Lvar{'', 0, 0}
+  return &Parser{token: tk, head_lvar: l, tail_lvar: l}
 }
 
-pub fn (p &Parser) parse() []&Node {
-  return p.program()
+pub fn (p &Parser) parse() {
+  p.program = p.program()
 }
 
 fn new_node(kind NodeKind, s string, lhs &Node, rhs &Node) &Node {
@@ -159,8 +186,9 @@ fn (p &Parser) primary() &Node {
   }
 
   if p.token.kind == .ident {
+    p.tail_lvar.next = new_lvar(p.token.str, p.tail_lvar.offset + 8)
+    p.tail_lvar = p.tail_lvar.next
     node := &Node{.lvar, p.token.str, 0, 0, 0, 0}
-    node.offset = (int(p.token.str[0]) - int(`a`) + 1) * 8
     p.token.next_token()
     return node
   }

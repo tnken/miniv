@@ -30,7 +30,9 @@ fn test_parser() {
     '(1+1)*4-6',
     'a:=1',
     'b:=1+1 - 1',
-    'c:=3 c'
+    'c:=3 c',
+    'hoge := 3 hoge',
+    'hoge:=1fuga:=2hoge+fuga'
   ]
 
   expecting := [
@@ -39,15 +41,17 @@ fn test_parser() {
     '1 + 1 * 4 - 6',
     'a := 1',
     'b := 1 + 1 - 1',
-    'c := 3 c'
+    'c := 3 c',
+    'hoge := 3 hoge',
+    'hoge := 1 fuga := 2 hoge + fuga'
   ]
 
   for i, input in inputs {
     tok := token.tokenize(input)
     p := parser.new_parser(tok)
-    program := p.parse()
-    mut out := to_string(program[0])
-    for node in program[1..] {
+    p.parse()
+    mut out := to_string(p.program[0])
+    for node in p.program[1..] {
       out += ' ' + to_string(node)
     }
     assert out == expecting[i]
