@@ -17,7 +17,7 @@ fn display_result(idx int, ok bool) {
 fn test_tokenizer() {
   input := [
     ' 11   ',
-    ' 1 + 1 '
+    ' 1 + 1 ',
     '1-1',
     '1000+100000-1',
     ' 1000  + 100000 - 1  ',

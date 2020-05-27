@@ -22,23 +22,27 @@ fn gen_lvar(node parser.Node) {
 }
 
 pub fn gen(node parser.Node) {
-  if node.kind == .num {
-    println('  push $$node.val')
-    return
-  } else if node.kind == .lvar {
-    gen_lvar(node)
-    println('  pop %rax')
-    println('  mov (%rax), %rax')
-    println('  push %rax')
-    return
-  } else if node.kind == .assign {
-    gen_lvar(node.lhs)
-    gen(node.rhs)
-    println('  pop %rdi')
-    println('  pop %rax')
-    println('  mov %rdi, (%rax)')
-    println('  push %rdi')
-    return
+  match node.kind {
+    .num {
+      println('  push $$node.val')
+      return
+    }
+    .lvar {
+      gen_lvar(node)
+      println('  pop %rax')
+      println('  mov (%rax), %rax')
+      println('  push %rax')
+      return
+    }
+    .assign {
+      gen_lvar(node.lhs)
+      gen(node.rhs)
+      println('  pop %rdi')
+      println('  pop %rax')
+      println('  mov %rdi, (%rax)')
+      println('  push %rdi')
+      return
+    } else {}
   }
 
   gen(node.lhs)
@@ -47,31 +51,40 @@ pub fn gen(node parser.Node) {
   println('  pop %rdi')
   println('  pop %rax')
 
-  if node.kind == .add {
-    println('  add %rdi, %rax')
-  } else if node.kind == .sub {
-    println('  sub %rdi, %rax')
-  } else if node.kind == .mul {
-    println('  imul %rdi, %rax')
-  } else if node.kind == .div {
-    println('  cqo')
-    println('  idiv %rdi')
-  } else if node.kind == .eq {
-    println('  cmp %rdi, %rax')
-    println('  sete %al')
-    println('  movzb %al, %rax')
-  } else if node.kind == .ne {
-    println('  cmp %rdi, %rax')
-    println('  setne %al')
-    println('  movzb %al, %rax')
-  } else if node.kind == .lt {
-    println('  cmp %rdi, %rax')
-    println('  setl %al')
-    println('  movzb %al, %rax')
-  } else if node.kind == .le {
-    println('  cmp %rdi, %rax')
-    println('  setle %al')
-    println('  movzb %al, %rax')
+  match node.kind {
+    .add {
+      println('  add %rdi, %rax')
+    }
+    .sub {
+      println('  sub %rdi, %rax')
+    }
+    .mul {
+      println('  imul %rdi, %rax')
+    }
+    .div {
+      println('  cqo')
+      println('  idiv %rdi')
+    }
+    .eq {
+      println('  cmp %rdi, %rax')
+      println('  sete %al')
+      println('  movzb %al, %rax')
+    }
+    .ne {
+      println('  cmp %rdi, %rax')
+      println('  setne %al')
+      println('  movzb %al, %rax')
+    }
+    .lt {
+      println('  cmp %rdi, %rax')
+      println('  setl %al')
+      println('  movzb %al, %rax')
+    }
+    .le {
+      println('  cmp %rdi, %rax')
+      println('  setle %al')
+      println('  movzb %al, %rax')
+    } else {}
   }
 
   println('  push %rax')
