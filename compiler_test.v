@@ -72,9 +72,25 @@ fn test_calculation() {
     Case{'0 <= 1', 1},
     Case{'1 <= 0', 0},
     Case{'0 <= 0', 1},
+    Case{'c:=3', 3}
   ]
 
   for idx, c in cases {
+    expected := c.expecting
+    output := compile(c.input)
+    assert expected == output
+    display_result(idx, expected == output)
+  }
+}
+
+fn test_lvar() {
+  cases := [
+    Case{'a:=1', 1},
+    Case{'a:=1 b:=1 c:=b-a 0', 0}
+    Case{'a:=1 b:=2 c:=3 a+b+c', 6}
+  ]
+
+   for idx, c in cases {
     expected := c.expecting
     output := compile(c.input)
     assert expected == output

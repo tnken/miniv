@@ -53,6 +53,7 @@ pub enum TokenKind {
   reserved
   num
   eof
+  ident
 }
 
 struct Token {
@@ -63,7 +64,7 @@ struct Token {
     str string
 }
 
-fn (t &Token) next_token() {
+pub fn (t &Token) next_token() {
   next := t.next
   t.kind = next.kind
   t.val = next.val
@@ -87,6 +88,15 @@ pub fn (t &Token) consume(op string) bool {
   }
   t.next_token()
   return true
+}
+
+pub fn (t &Token) consume_ident() &Token {
+  if t.kind != .ident {
+    return 0
+  }
+  tok := t
+  t.next_token()
+  return tok
 }
 
 pub fn (t &Token) expect(op string) {
@@ -126,10 +136,22 @@ pub fn tokenize(input string) &Token{
         sc.scan_advance(2)
         continue
       }
+
+      if target == ':=' {
+        cur = new_token(.reserved, cur, target)
+        sc.scan_advance(2)
+        continue
+      }
     }
 
     if sc.ch.str() in '+-*/()<>' {
       cur = new_token(.reserved, cur, sc.ch.str())
+      sc.scan_advance(1)
+      continue
+    }
+
+    if `a` <= sc.ch && sc.ch <= `z` {
+      cur = new_token(.ident, cur, sc.ch.str())
       sc.scan_advance(1)
       continue
     }

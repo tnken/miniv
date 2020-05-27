@@ -1,23 +1,18 @@
 import parser
 import token
 
-fn to_postfix(node parser.Node) string {
+fn to_string(node parser.Node) string {
   if node.kind == .num {
     return node.val.str()
   }
-
-  l := to_postfix(node.lhs)
-  r := to_postfix(node.rhs)
-
-  if node.kind == .add {
-    return '$l $r +'
-  } else if node.kind == .sub {
-    return '$l $r -'
-  } else if node.kind == .mul {
-    return '$l $r *'
-  } else if node.kind == .div {
-    return '$l $r /'
+  if node.kind == .lvar {
+    return node.str
   }
+
+  l := to_string(node.lhs)
+  r := to_string(node.rhs)
+
+  return '$l $node.str $r'
 }
 
 fn display_result(idx int, ok bool) {
@@ -30,24 +25,32 @@ fn display_result(idx int, ok bool) {
 
 fn test_parser() {
   inputs := [
-    '(1+1) * (2-1)'
+    '(1+1)*(2-1)'
     '1+1*2-1',
-    '(1+1)*4-6'
+    '(1+1)*4-6',
+    'a:=1',
+    'b:=1+1 - 1',
+    'c:=3 c'
   ]
 
   expecting := [
-    '1 1 + 2 1 - *',
-    '1 1 2 * + 1 -',
-    '1 1 + 4 * 6 -'
+    '1 + 1 * 2 - 1'
+    '1 + 1 * 2 - 1',
+    '1 + 1 * 4 - 6',
+    'a := 1',
+    'b := 1 + 1 - 1',
+    'c := 3 c'
   ]
 
   for i, input in inputs {
     tok := token.tokenize(input)
     p := parser.new_parser(tok)
-    node := p.parse()
-    r := to_postfix(node)
-
-    assert r == expecting[i]
-    display_result(i, r == expecting[i])
+    program := p.parse()
+    mut out := to_string(program[0])
+    for node in program[1..] {
+      out += ' ' + to_string(node)
+    }
+    assert out == expecting[i]
+    display_result(i, out == expecting[i])
   }
 }

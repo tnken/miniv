@@ -12,9 +12,12 @@ fn main(){
   }
   tok := token.tokenize(os.args[1])
   p := parser.new_parser(tok)
-  node := p.parse()
+  nodes := p.parse()
 
-  codegen.init()
-  codegen.gen(node)
+  codegen.ini()
+  for node in nodes {
+    codegen.gen(node)
+    println('  pop %rax')
+  }
   codegen.end()
 }

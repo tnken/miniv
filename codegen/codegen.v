@@ -1,19 +1,43 @@
 module codegen
 import parser
 
-pub fn init() {
+pub fn ini() {
   println('.global main')
   println('main:')
+  println('  push %rbp')
+  println('  mov %rsp, %rbp')
+  println('  sub $208, %rsp')
 }
 
 pub fn end() {
-  println('  pop %rax')
+  println('  mov %rbp, %rsp')
+  println('  pop %rbp')
   println('  ret')
+}
+
+fn gen_lvar(node parser.Node) {
+  println('  mov %rbp, %rax')
+  println('  sub $$node.offset, %rax')
+  println('  push %rax')
 }
 
 pub fn gen(node parser.Node) {
   if node.kind == .num {
     println('  push $$node.val')
+    return
+  } else if node.kind == .lvar {
+    gen_lvar(node)
+    println('  pop %rax')
+    println('  mov (%rax), %rax')
+    println('  push %rax')
+    return
+  } else if node.kind == .assign {
+    gen_lvar(node.lhs)
+    gen(node.rhs)
+    println('  pop %rdi')
+    println('  pop %rax')
+    println('  mov %rdi, (%rax)')
+    println('  push %rdi')
     return
   }
 

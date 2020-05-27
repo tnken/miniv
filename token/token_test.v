@@ -24,6 +24,9 @@ fn test_tokenizer() {
     '(1+1) * 3',
     '3==3',
     '5>=3',
+    'a',
+    'b := 1',
+    'c := 3 c'
   ]
 
   expecting := [
@@ -80,7 +83,24 @@ fn test_tokenizer() {
       ExpectToken{.reserved, 0, '>='},
       ExpectToken{.num, 3, ''},
       ExpectToken{.eof}
-    ]
+    ],
+    [
+      ExpectToken{.ident, 0, 'a'},
+      ExpectToken{.eof}
+    ],
+    [
+      ExpectToken{.ident, 0, 'b'},
+      ExpectToken{.reserved, 0, ':='},
+      ExpectToken{.num, 1, ''},
+      ExpectToken{.eof}
+    ],
+    [
+      ExpectToken{.ident, 0, 'c'},
+      ExpectToken{.reserved, 0, ':='},
+      ExpectToken{.num, 3, ''},
+      ExpectToken{.ident, 0, 'c'},
+      ExpectToken{.eof}
+    ],
   ]
 
   for idx, s in input {
