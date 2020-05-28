@@ -7,7 +7,7 @@
           "command": "v",
           "args": [
             "-g",
-            "tinyv.v"
+            "miniv.v"
           ],
           "group": {
               "kind": "build",

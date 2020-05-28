@@ -1,5 +1,5 @@
 Module {
-  name: 'tinyv',
+  name: 'miniv',
   description: 'v compiler',
   dependencies: []
 }

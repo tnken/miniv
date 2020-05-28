@@ -1,7 +1,7 @@
 import os
 
 fn compile(source string) int {
-  os.exec('./tinyv \'$source\' > tmp.s') or {
+  os.exec('./miniv \'$source\' > tmp.s') or {
     println('error: compile error')
     panic(err)
   }
@@ -109,7 +109,7 @@ fn test_return() {
     Case{'a:=1 b:=2 return a + 5', 6},
     Case{'hoge:=1 fuga:=2 poge := 3 return (hoge+fuga)*2', 6}
     Case{'a:=1 return a 3', 1},
-    Case{'a:=1 return a hoge := 2 return hoge 4', 1},
+    Case{'a:=1 return a hoge := 2 return hoge', 1},
   ]
 
    for idx, c in cases {

@@ -2,7 +2,7 @@ VCMD=v
 VTEST=$(VCMD) test
 
 build:
-			$(VCMD) tinyv.v
+			$(VCMD) miniv.v
 test:
 			$(VTEST) .
 test2:
@@ -10,7 +10,7 @@ test2:
 test3:
 			v -stats test .
 clean:
-			rm -f tinyv *~ tmp*
+			rm -f miniv *~ tmp*
 fmt:
 			$(VCMD) fmt ./*.v ./*/*.v
 
