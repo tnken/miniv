@@ -99,3 +99,23 @@ fn test_lvar() {
     display_result(idx, expected == output)
   }
 }
+
+fn test_return() {
+  cases := [
+    Case{'return 1+1-1-1', 0},
+    Case{'return (3+3)*2', 12},
+    Case{'a:=1 return a', 1},
+    Case{'a:=1 b:=2 return a', 1},
+    Case{'a:=1 b:=2 return a + 5', 6},
+    Case{'hoge:=1 fuga:=2 poge := 3 return (hoge+fuga)*2', 6}
+    Case{'a:=1 return a 3', 1},
+    Case{'a:=1 return a hoge := 2 return hoge 4', 1},
+  ]
+
+   for idx, c in cases {
+    expected := c.expecting
+    output := compile(c.input)
+    assert expected == output
+    display_result(idx, expected == output)
+  }
+}

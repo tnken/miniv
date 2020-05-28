@@ -28,6 +28,8 @@ fn test_tokenizer() {
     'b := 1',
     'c := 3 c',
     'hoge := 1'
+    'return 1',
+    'return 3+2'
   ]
 
   expecting := [
@@ -106,6 +108,18 @@ fn test_tokenizer() {
       ExpectToken{.ident, 0, 'hoge'},
       ExpectToken{.reserved, 0, ':='},
       ExpectToken{.num, 1, ''},
+      ExpectToken{.eof}
+    ],
+    [
+      ExpectToken{.reserved, 0, 'return'},
+      ExpectToken{.num, 1, ''},
+      ExpectToken{.eof}
+    ],
+    [
+      ExpectToken{.reserved, 0, 'return'},
+      ExpectToken{.num, 3, ''},
+      ExpectToken{.reserved, 0, '+'},
+      ExpectToken{.num, 2, ''},
       ExpectToken{.eof}
     ],
   ]

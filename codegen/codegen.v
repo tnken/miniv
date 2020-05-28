@@ -60,6 +60,12 @@ fn (cg Cgen) gen(node parser.Node) {
       println('  mov %rdi, (%rax)')
       println('  push %rdi')
       return
+    }
+    .nd_return {
+      cg.gen(node.rhs)
+      println('  pop %rax')
+      end()
+      return
     } else {}
   }
 

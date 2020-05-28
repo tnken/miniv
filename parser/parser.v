@@ -3,17 +3,18 @@ module parser
 import token
 
 enum NodeKind {
-  add      // +
-  sub      // -
-  mul      // *
-  div      // /
-  num      // number
-  lt       // <
-  le       // <=
-  eq       // ==
-  ne       // !=
-  assign   // :=
-  lvar     // hoge
+  add        // +
+  sub        // -
+  mul        // *
+  div        // /
+  num        // number
+  lt         // <
+  le         // <=
+  eq         // ==
+  ne         // !=
+  assign     // :=
+  lvar       // hoge
+  nd_return  // return
 }
 
 struct Node {
@@ -46,7 +47,7 @@ pub fn (p &Parser) find_lvar(name string) &Lvar {
     if l.next == 0 {break}
     l = l.next
   }
-  return 0
+  panic('Error: can not find local variable')
 }
 
 pub fn (n Node) string() string {
@@ -91,6 +92,9 @@ fn (p &Parser) program() []&Node {
 }
 
 fn (p &Parser) stmt() &Node {
+  if p.token.consume('return') {
+    return &Node{.nd_return, 'return', 0, 0, p.equality(), 0}
+  }
   node := p.expr()
   return node
 }

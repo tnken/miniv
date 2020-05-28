@@ -2,11 +2,13 @@ import parser
 import token
 
 fn to_string(node parser.Node) string {
-  if node.kind == .num {
-    return node.val.str()
-  }
-  if node.kind == .lvar {
-    return node.str
+  match node.kind {
+    .num { return node.val.str() }
+    .lvar { return node.str }
+    .nd_return{
+      r := to_string(node.rhs)
+      return '$node.str $r'
+    } else {}
   }
 
   l := to_string(node.lhs)
@@ -32,7 +34,9 @@ fn test_parser() {
     'b:=1+1 - 1',
     'c:=3 c',
     'hoge := 3 hoge',
-    'hoge:=1fuga:=2hoge+fuga'
+    'hoge:=1fuga:=2hoge+fuga',
+    'return 3',
+    'hoge := 3 return hoge'
   ]
 
   expecting := [
@@ -43,7 +47,9 @@ fn test_parser() {
     'b := 1 + 1 - 1',
     'c := 3 c',
     'hoge := 3 hoge',
-    'hoge := 1 fuga := 2 hoge + fuga'
+    'hoge := 1 fuga := 2 hoge + fuga',
+    'return 3',
+    'hoge := 3 return hoge'
   ]
 
   for i, input in inputs {

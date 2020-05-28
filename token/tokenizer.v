@@ -94,15 +94,6 @@ pub fn (t &Token) consume(op string) bool {
   return true
 }
 
-pub fn (t &Token) consume_ident() &Token {
-  if t.kind != .ident {
-    return 0
-  }
-  tok := t
-  t.next_token()
-  return tok
-}
-
 pub fn (t &Token) expect(op string) {
   if t.kind != .reserved || t.str != op {
     panic('error: not expected operator')
@@ -146,6 +137,14 @@ pub fn tokenize(input string) &Token{
       if target == ':=' {
         cur = new_token(.reserved, cur, target)
         sc.scan_advance(2)
+        continue
+      }
+    }
+
+    if sc.pos < (sc.input.len - 'return'.len) {
+      if sc.input[sc.pos..sc.pos+6] == 'return' {
+        cur = new_token(.reserved, cur, 'return')
+        sc.scan_advance(6)
         continue
       }
     }
