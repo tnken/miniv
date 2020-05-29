@@ -1,4 +1,5 @@
 module codegen
+
 import parser
 
 fn ini() {
@@ -30,86 +31,91 @@ struct Cgen {
 }
 
 fn (cg Cgen) gen_lvar(node parser.Node) {
-  if node.kind != .lvar {
-    panic('Error: Not local variable')
+  match node {
+   parser.LvarNode {
+      println('  mov %rbp, %rax')
+      offset := cg.p.get_lvar_offset(it.str)
+      println('  sub $$offset, %rax')
+      println('  push %rax')
+
+    }  else {
+      panic('Error: not local variable')
+    }
   }
-  println('  mov %rbp, %rax')
-  offset := cg.p.find_lvar(node.str).offset
-  println('  sub $$offset, %rax')
-  println('  push %rax')
 }
 
 fn (cg Cgen) gen(node parser.Node) {
-  match node.kind {
-    .num {
-      println('  push $$node.val')
+  match node {
+    parser.NumNode { 
+      println('  push $$it.val')
       return
     }
-    .lvar {
+    parser.LvarNode { 
       cg.gen_lvar(node)
       println('  pop %rax')
       println('  mov (%rax), %rax')
       println('  push %rax')
       return
     }
-    .assign {
-      cg.gen_lvar(node.lhs)
-      cg.gen(node.rhs)
+    parser.ReturnNode { 
+      cg.gen(it.rhs)
+      println('  pop %rax')
+      end()
+      return
+    }
+    parser.AssignNode {
+      cg.gen_lvar(it.lhs)
+      cg.gen(it.rhs)
       println('  pop %rdi')
       println('  pop %rax')
       println('  mov %rdi, (%rax)')
       println('  push %rdi')
       return
     }
-    .nd_return {
-      cg.gen(node.rhs)
+    parser.InfixNode {
+      cg.gen(it.lhs)
+      cg.gen(it.rhs)
+
+      println('  pop %rdi')
       println('  pop %rax')
-      end()
-      return
-    } else {}
-  }
 
-  cg.gen(node.lhs)
-  cg.gen(node.rhs)
+      match it.kind {
+        .add {
+          println('  add %rdi, %rax')
+        }
+        .sub {
+          println('  sub %rdi, %rax')
+        }
+        .mul {
+          println('  imul %rdi, %rax')
+        }
+        .div {
+          println('  cqo')
+          println('  idiv %rdi')
+        }
+        .eq {
+          println('  cmp %rdi, %rax')
+          println('  sete %al')
+          println('  movzb %al, %rax')
+        }
+        .ne {
+          println('  cmp %rdi, %rax')
+          println('  setne %al')
+          println('  movzb %al, %rax')
+        }
+        .lt {
+          println('  cmp %rdi, %rax')
+          println('  setl %al')
+          println('  movzb %al, %rax')
+        }
+        .le {
+          println('  cmp %rdi, %rax')
+          println('  setle %al')
+          println('  movzb %al, %rax')
+        } else {}
+      }
 
-  println('  pop %rdi')
-  println('  pop %rax')
-
-  match node.kind {
-    .add {
-      println('  add %rdi, %rax')
+      println('  push %rax')
     }
-    .sub {
-      println('  sub %rdi, %rax')
-    }
-    .mul {
-      println('  imul %rdi, %rax')
-    }
-    .div {
-      println('  cqo')
-      println('  idiv %rdi')
-    }
-    .eq {
-      println('  cmp %rdi, %rax')
-      println('  sete %al')
-      println('  movzb %al, %rax')
-    }
-    .ne {
-      println('  cmp %rdi, %rax')
-      println('  setne %al')
-      println('  movzb %al, %rax')
-    }
-    .lt {
-      println('  cmp %rdi, %rax')
-      println('  setl %al')
-      println('  movzb %al, %rax')
-    }
-    .le {
-      println('  cmp %rdi, %rax')
-      println('  setle %al')
-      println('  movzb %al, %rax')
-    } else {}
-  }
-
-  println('  push %rax')
+  }  
 }

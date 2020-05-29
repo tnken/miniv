@@ -84,7 +84,7 @@ fn test_calculation() {
 
 fn test_lvar() {
   cases := [
-    Case{'a:=1', 1},
+    Case{'a:=2', 2},
     Case{'a:=2 b:=1 c:=a-b', 1},
     Case{'a:=2 b:=1 c:=a-b 0', 0},
     Case{'a:=1 b:=2 c:=3 a+b+c', 6},
