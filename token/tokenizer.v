@@ -139,6 +139,20 @@ pub fn tokenize(input string) &Token{
         sc.scan_advance(2)
         continue
       }
+
+      if target == 'if' {
+        cur = new_token(.reserved, cur, target)
+        sc.scan_advance(2)
+        continue
+      }
+    }
+
+    if sc.pos < sc.input.len-3 {
+      if sc.input[sc.pos..sc.pos+4] == 'else' {
+        cur = new_token(.reserved, cur, 'else')
+        sc.scan_advance(4)
+        continue
+      }
     }
 
     if sc.pos < (sc.input.len - 'return'.len) {

@@ -13,7 +13,10 @@ fn test_parser() {
     'hoge := 3 hoge',
     'hoge:=1fuga:=2hoge+fuga',
     'return 3',
-    'hoge := 3 return hoge'
+    'hoge := 3 return hoge',
+    'if 3 1+1',
+    'if 1+1-1 3+3'
+    'if 0+1 return 2 else return 3'
   ]
 
   expecting := [
@@ -27,7 +30,10 @@ fn test_parser() {
     'hoge := 3 hoge',
     'hoge := 1 fuga := 2 hoge + fuga',
     'return 3',
-    'hoge := 3 return hoge'
+    'hoge := 3 return hoge',
+    'if 3 1 + 1',
+    'if 1 + 1 - 1 3 + 3',
+    'if 0 + 1 return 2 else return 3'
   ]
 
   for i, input in inputs {
@@ -38,6 +44,7 @@ fn test_parser() {
     for node in p.program[1..] {
       out += ' ' + parser.sequence(node)
     }
+    println(out)
     assert out == expecting[i]
   }
 }

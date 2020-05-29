@@ -15,9 +15,11 @@ enum NodeKind {
   assign     // :=
   lvar       // hoge
   nd_return  // return
+  nd_if
 }
 
-type Node = InfixNode | NumNode | LvarNode | AssignNode | ReturnNode
+type Node = InfixNode | NumNode | LvarNode | AssignNode | ReturnNode |
+            IfNode
 
 struct InfixNode {
   pub mut:
@@ -73,6 +75,35 @@ fn new_return_node(rhs Node) Node {
   return ReturnNode{.nd_return, rhs}
 }
 
+// if <condition> <consequence> else <alternative>
+struct IfNode {
+  pub:
+  kind NodeKind
+  condition Node
+  consequence Node
+  alternative Node
+  has_alternative bool
+}
+
+fn new_if_node(cdt Node, cse Node) IfNode {
+  return IfNode{
+    kind: .nd_if
+    condition: cdt
+    consequence: cse
+    has_alternative: false
+  }
+}
+
+fn new_if_eles_node(cdt Node, cse Node, alt Node) IfNode {
+  return IfNode{
+    kind: .nd_if
+    condition: cdt
+    consequence: cse
+    alternative: alt
+    has_alternative: true
+  }
+}
+
 pub fn sequence(node Node) string {
   match node {
     NumNode { return it.val.str() }
@@ -87,6 +118,16 @@ pub fn sequence(node Node) string {
       l := sequence(it.lhs)
       r := sequence(it.rhs)
       return '$l $it.str $r'
+    }
+    IfNode {
+      cd := sequence(it.condition)
+      cs := sequence(it.consequence)
+
+      if it.has_alternative {
+        alt := sequence(it.alternative)
+        return 'if $cd $cs else $alt'
+      }
+      return 'if $cd $cs'
     }
   }
 }
@@ -142,6 +183,17 @@ fn (p &Parser) program() []Node {
 fn (p &Parser) stmt() Node {
   if p.token.consume('return') {
     return new_return_node(p.equality())
+  }
+
+  if p.token.consume('if') {
+    exp := p.expr()
+    con := p.stmt()
+
+    if p.token.consume('else') {
+      alt := p.stmt()
+      return new_if_eles_node(exp, con, alt)
+    }
+    return new_if_node(exp, con)
   }
   node := p.expr()
   return node

@@ -119,3 +119,25 @@ fn test_return() {
     display_result(idx, expected == output)
   }
 }
+
+fn test_if() {
+  cases := [
+    Case{'if 1 return 3', 3},
+    Case{'if 1 return 1 1+1', 1},
+    Case{'if 0 return 1 1+1', 2},
+    Case{'hoge := 1 if 2-1 hoge', 1},
+    Case{'hoge := 1 if hoge return 2 else 3', 2},
+    Case{'hoge := 0 if hoge return 2 else 3', 3},
+    Case{'a:=3 if 0 a+4 else a-1', 2},
+    Case{'a:=1 if 1 a+4 else a-1', 5},
+    Case{'a:=1 if 2 if 0 a+1 else a+2 else 4', 3}
+  ]
+
+   for idx, c in cases {
+    expected := c.expecting
+    output := compile(c.input)
+    assert expected == output
+    println(output)
+    display_result(idx, expected == output)
+  }
+}

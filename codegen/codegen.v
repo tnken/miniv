@@ -28,6 +28,8 @@ pub fn gen_program(p &parser.Parser) {
 
 struct Cgen {
   p parser.Parser
+  mut:
+  if_counter int
 }
 
 fn (cg Cgen) gen_lvar(node parser.Node) {
@@ -44,20 +46,20 @@ fn (cg Cgen) gen_lvar(node parser.Node) {
   }
 }
 
-fn (cg Cgen) gen(node parser.Node) {
+fn (mut cg Cgen) gen(node parser.Node) {
   match node {
-    parser.NumNode { 
+    parser.NumNode {
       println('  push $$it.val')
       return
     }
-    parser.LvarNode { 
+    parser.LvarNode {
       cg.gen_lvar(node)
       println('  pop %rax')
       println('  mov (%rax), %rax')
       println('  push %rax')
       return
     }
-    parser.ReturnNode { 
+    parser.ReturnNode {
       cg.gen(it.rhs)
       println('  pop %rax')
       end()
@@ -70,6 +72,26 @@ fn (cg Cgen) gen(node parser.Node) {
       println('  pop %rax')
       println('  mov %rdi, (%rax)')
       println('  push %rdi')
+      return
+    }
+    parser.IfNode {
+      cg.gen(it.condition)
+      println('  pop %rax')
+      println('  cmp $0, %rax')
+
+      if it.has_alternative {
+        println('  je LELSE${cg.if_counter}')
+        cg.gen(it.consequence)
+        println('  jmp LEND${cg.if_counter}')
+        println('LELSE${cg.if_counter}:')
+        cg.gen(it.alternative)
+      } else {
+        println('  je LEND${cg.if_counter}')
+        cg.gen(it.consequence)
+      }
+      println('LEND${cg.if_counter}:')
+
+      cg.if_counter++
       return
     }
     parser.InfixNode {
@@ -117,5 +139,5 @@ fn (cg Cgen) gen(node parser.Node) {
 
       println('  push %rax')
     }
-  }  
+  }
 }

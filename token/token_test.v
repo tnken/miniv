@@ -1,6 +1,7 @@
 import token
 
-struct ExpectToken {
+// ExpectedToken
+struct ET {
   kind token.TokenKind
   val int
   str string
@@ -34,93 +35,93 @@ fn test_tokenizer() {
 
   expecting := [
     [
-      ExpectToken{.num, 11, ''},
-      ExpectToken{.eof}
+      ET{.num, 11, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.reserved, 0, '+'},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.num, 1, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.reserved, 0, '-'},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.num, 1, ''},
+      ET{.reserved, 0, '-'},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.num, 1000, ''},
-      ExpectToken{.reserved, 0, '+'},
-      ExpectToken{.num, 100000, ''},
-      ExpectToken{.reserved, 0, '-'},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.num, 1000, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 100000, ''},
+      ET{.reserved, 0, '-'},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
       [
-      ExpectToken{.num, 1000, ''},
-      ExpectToken{.reserved, 0, '+'},
-      ExpectToken{.num, 100000, ''},
-      ExpectToken{.reserved, 0, '-'},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.num, 1000, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 100000, ''},
+      ET{.reserved, 0, '-'},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.reserved, 0, '('},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.reserved, 0, '+'},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.reserved, 0, ')'},
-      ExpectToken{.reserved, 0, '*'},
-      ExpectToken{.num, 3, ''},
-      ExpectToken{.eof}
+      ET{.reserved, 0, '('},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, ')'},
+      ET{.reserved, 0, '*'},
+      ET{.num, 3, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.num, 3, ''},
-      ExpectToken{.reserved, 0, '=='},
-      ExpectToken{.num, 3, ''},
-      ExpectToken{.eof}
+      ET{.num, 3, ''},
+      ET{.reserved, 0, '=='},
+      ET{.num, 3, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.num, 5, ''},
-      ExpectToken{.reserved, 0, '>='},
-      ExpectToken{.num, 3, ''},
-      ExpectToken{.eof}
+      ET{.num, 5, ''},
+      ET{.reserved, 0, '>='},
+      ET{.num, 3, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.ident, 0, 'a'},
-      ExpectToken{.eof}
+      ET{.ident, 0, 'a'},
+      ET{.eof}
     ],
     [
-      ExpectToken{.ident, 0, 'b'},
-      ExpectToken{.reserved, 0, ':='},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.ident, 0, 'b'},
+      ET{.reserved, 0, ':='},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.ident, 0, 'c'},
-      ExpectToken{.reserved, 0, ':='},
-      ExpectToken{.num, 3, ''},
-      ExpectToken{.ident, 0, 'c'},
-      ExpectToken{.eof}
+      ET{.ident, 0, 'c'},
+      ET{.reserved, 0, ':='},
+      ET{.num, 3, ''},
+      ET{.ident, 0, 'c'},
+      ET{.eof}
     ],
     [
-      ExpectToken{.ident, 0, 'hoge'},
-      ExpectToken{.reserved, 0, ':='},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.ident, 0, 'hoge'},
+      ET{.reserved, 0, ':='},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.reserved, 0, 'return'},
-      ExpectToken{.num, 1, ''},
-      ExpectToken{.eof}
+      ET{.reserved, 0, 'return'},
+      ET{.num, 1, ''},
+      ET{.eof}
     ],
     [
-      ExpectToken{.reserved, 0, 'return'},
-      ExpectToken{.num, 3, ''},
-      ExpectToken{.reserved, 0, '+'},
-      ExpectToken{.num, 2, ''},
-      ExpectToken{.eof}
+      ET{.reserved, 0, 'return'},
+      ET{.num, 3, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 2, ''},
+      ET{.eof}
     ],
   ]
 
@@ -142,6 +143,53 @@ fn test_tokenizer() {
       }
 
       tk = tk.next
+    }
+  }
+}
+
+fn test_if_tokenize() {
+  inputs := [
+    'if 1+1 return 3',
+    'if 1+1 return 2 else return 3'
+  ]
+
+  expecting := [
+   [
+      ET{.reserved, 0, 'if'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, 'return'},
+      ET{.num, 3, ''},
+      ET{.eof}
+   ],
+   [
+      ET{.reserved, 0, 'if'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, '+'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, 'return'},
+      ET{.num, 2, ''},
+      ET{.reserved, 0, 'else'},
+      ET{.reserved, 0, 'return'},
+      ET{.num, 3, ''},
+      ET{.eof}
+   ]
+  ]
+
+  for i, input in inputs {
+    mut tok := token.tokenize(input)
+    mut j := 0
+
+    for tok.kind != .eof {
+      expected := expecting[i][j++]
+      assert expected.kind == tok.kind
+      if expected.kind == .num {
+        assert expected.val == tok.val
+      } else {
+        assert expected.str == tok.str
+      }
+      tok = tok.next
     }
   }
 }
