@@ -40,7 +40,6 @@ fn (cg Cgen) gen_lvar(node parser.Node) {
       offset := cg.p.get_lvar_offset(it.str)
       println('  sub $$offset, %rax')
       println('  push %rax')
-
     }  else {
       panic('Error: not local variable')
     }
@@ -99,14 +98,15 @@ fn (mut cg Cgen) gen(node parser.Node) {
         println('  je LEND${cg.if_counter}')
         cg.gen(it.consequence)
       }
-      println('LEND${cg.if_counter}:')
 
+      println('LEND${cg.if_counter}:')
       cg.if_counter++
       return
     }
     parser.ForNode {
       if it.is_cstyle {
         cg.gen(it.init)
+        println('  pop %rax')
         println('LSTART$cg.for_counter:')
         cg.gen(it.condition)
         println('  pop %rax')
@@ -116,8 +116,6 @@ fn (mut cg Cgen) gen(node parser.Node) {
         cg.gen(it.increment)
         println('  jmp LSTART$cg.for_counter')
         println('LEND$cg.for_counter:')
-        cg.for_counter++
-        return
       } else {
         println('LSTART$cg.for_counter:')
         cg.gen(it.condition)
@@ -127,9 +125,10 @@ fn (mut cg Cgen) gen(node parser.Node) {
         cg.gen(it.consequence)
         println('  jmp LSTART$cg.for_counter')
         println('LEND$cg.for_counter:')
-        cg.for_counter++
-        return
       }
+
+      cg.for_counter++
+      return
     }
     parser.InfixNode {
       cg.gen(it.lhs)
@@ -171,7 +170,7 @@ fn (mut cg Cgen) gen(node parser.Node) {
           println('  cmp %rdi, %rax')
           println('  setle %al')
           println('  movzb %al, %rax')
-        } else {}
+        }
       }
 
       println('  push %rax')
