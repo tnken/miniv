@@ -249,3 +249,41 @@ fn test_for_tokenize() {
     }
   }
 }
+
+
+fn test_block_tokenize() {
+  inputs := [
+    'if 1 {a:=1 a=3}',
+  ]
+
+  expecting := [
+   [
+      ET{.reserved, 0, 'if'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, '{'},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, ':='},
+      ET{.num, 1, ''},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, '='},
+      ET{.num, 3, ''},
+      ET{.reserved, 0, '}'}
+   ]
+  ]
+
+  for i, input in inputs {
+    mut tok := token.tokenize(input)
+    mut j := 0
+
+    for tok.kind != .eof {
+      expected := expecting[i][j++]
+      assert expected.kind == tok.kind
+      if expected.kind == .num {
+        assert expected.val == tok.val
+      } else {
+        assert expected.str == tok.str
+      }
+      tok = tok.next
+    }
+  }
+}

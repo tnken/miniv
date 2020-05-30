@@ -1,18 +1,18 @@
 module parser
 
-enum InfixKind {
-  add        // +
-  sub        // -
-  mul        // *
-  div        // /
-  lt         // <
-  le         // <=
-  eq         // ==
-  ne         // !=
-}
-
 type Node = InfixNode | NumNode | LvarNode | AssignNode | ReturnNode |
-            IfNode | ForNode | DeclareNode
+            IfNode | ForNode | DeclareNode | BlockNode
+
+enum InfixKind {
+  add // +
+  sub // -
+  mul // *
+  div // /
+  lt  // <
+  le  // <=
+  eq  // ==
+  ne  // !=
+}
 
 struct InfixNode {
   pub mut:
@@ -125,4 +125,13 @@ fn new_cstyle_for_node(init Node, cond Node, inc Node, cons Node) ForNode {
     consequence: cons
     is_cstyle: true
   }
+}
+
+struct BlockNode {
+  pub:
+  stmts []Node
+}
+
+fn new_block_node(stmts []Node) BlockNode {
+  return BlockNode{stmts: stmts}
 }

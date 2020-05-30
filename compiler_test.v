@@ -131,7 +131,9 @@ fn test_if() {
     Case{'hoge := 0 if hoge return 2 else 3', 3},
     Case{'a:=3 if 0 a+4 else a-1', 2},
     Case{'a:=1 if 1 a+4 else a-1', 5},
-    Case{'a:=1 if 2 if 0 a+1 else a+2 else 4', 3}
+    Case{'a:=1 if 2 if 0 a+1 else a+2 else 4', 3},
+    Case{'a:=2 if 1 {b:=1 c:=1 a=a+b+c} a', 4},
+    Case{'a:=2 if 0 {b:=1 c:=1 a=a+b+c} else {d:=4 a=a+d} a', 6}
   ]
 
    for idx, c in cases {
@@ -152,12 +154,12 @@ fn test_for() {
     Case{'a := 0 for i := 0; i < 10; i=i+1 a=a+1 a', 10}
     Case{'a := 10 for i := 5; i > 0; i=i-1 a=a+1 a', 15},
     Case{'a := 0 for i := 0; i < 100; i=i+10 a=a+1 a', 10},
+    Case{'a:=0 for i:=0; i<10; i=i+1 { b:=1 c:=1 a = a+b+c } a', 20}
   ]
 
    for idx, c in cases {
     expected := c.expecting
     output := compile(c.input)
-    // println(output)
     assert expected == output
     display_result(idx, expected == output)
   }

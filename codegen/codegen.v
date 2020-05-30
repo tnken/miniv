@@ -130,6 +130,13 @@ fn (mut cg Cgen) gen(node parser.Node) {
       cg.for_counter++
       return
     }
+    parser.BlockNode {
+      for stmt in it.stmts {
+        cg.gen(stmt)
+        println('  pop %rax')
+      }
+      return
+    }
     parser.InfixNode {
       cg.gen(it.lhs)
       cg.gen(it.rhs)

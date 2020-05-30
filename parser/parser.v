@@ -44,6 +44,17 @@ pub fn sequence(node Node) string {
       cs := sequence(it.consequence)
       return 'for $cd $cs'
     }
+    BlockNode {
+      if it.stmts.len > 0 {
+        mut str := '{ '
+        for stmt in it.stmts[..(it.stmts.len-1)] {
+          str += sequence(stmt) + ' '
+        }
+        str += sequence(it.stmts[it.stmts.len-1])
+        return str + ' }'
+      }
+      return ''
+    }
   }
 }
 
@@ -123,6 +134,14 @@ fn (p &Parser) stmt() Node {
 
     cons := p.stmt()
     return new_for_node(exp, cons)
+  }
+
+  if p.token.consume('{') {
+    mut stmts := []Node{}
+    for !p.token.consume('}') {
+      stmts << p.stmt()
+    }
+    return new_block_node(stmts)
   }
 
   node := p.expr()

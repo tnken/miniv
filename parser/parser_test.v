@@ -44,7 +44,6 @@ fn test_parser() {
     for node in p.program[1..] {
       out += ' ' + parser.sequence(node)
     }
-    println(out)
     assert out == expecting[i]
   }
 }
@@ -52,12 +51,14 @@ fn test_parser() {
 fn test_for_parsing(){
   inputs := [
     'a:=1 for a<10 a=a+1 a',
-    'a:=0 for i:=0; i<10; i=i+1 a=a+1 a'
+    'a:=0 for i:=0; i<10; i=i+1 a=a+1 a',
+    'a:=1 for a<10 { a=a+1 a=a+1 } a'
   ]
 
   expecting := [
     'a := 1 for a < 10 a = a + 1 a',
-    'a := 0 for i := 0 ; i < 10 ; i = i + 1 a = a + 1 a'
+    'a := 0 for i := 0 ; i < 10 ; i = i + 1 a = a + 1 a',
+    'a := 1 for a < 10 { a = a + 1 a = a + 1 } a'
   ]
 
   for i, input in inputs {
@@ -68,7 +69,6 @@ fn test_for_parsing(){
     for node in p.program[1..] {
       out += ' ' + parser.sequence(node)
     }
-    println(out)
     assert out == expecting[i]
   }
 }
