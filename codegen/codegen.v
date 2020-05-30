@@ -105,15 +105,31 @@ fn (mut cg Cgen) gen(node parser.Node) {
       return
     }
     parser.ForNode {
-      println('LSTART$cg.for_counter:')
-      cg.gen(it.condition)
-      println('  pop %rax')
-      println('  cmp $0, %rax')
-      println('  je LEND$cg.for_counter')
-      cg.gen(it.consequence)
-      println('  jmp LSTART$cg.for_counter')
-      println('LEND$cg.for_counter:')
-      cg.for_counter++
+      if it.is_cstyle {
+        cg.gen(it.init)
+        println('LSTART$cg.for_counter:')
+        cg.gen(it.condition)
+        println('  pop %rax')
+        println('  cmp $0, %rax')
+        println('  je LEND${cg.if_counter}')
+        cg.gen(it.consequence)
+        cg.gen(it.increment)
+        println('  jmp LSTART$cg.for_counter')
+        println('LEND$cg.for_counter:')
+        cg.for_counter++
+        return
+      } else {
+        println('LSTART$cg.for_counter:')
+        cg.gen(it.condition)
+        println('  pop %rax')
+        println('  cmp $0, %rax')
+        println('  je LEND$cg.for_counter')
+        cg.gen(it.consequence)
+        println('  jmp LSTART$cg.for_counter')
+        println('LEND$cg.for_counter:')
+        cg.for_counter++
+        return
+      }
     }
     parser.InfixNode {
       cg.gen(it.lhs)

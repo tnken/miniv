@@ -117,14 +117,29 @@ fn new_if_eles_node(cdt Node, cse Node, alt Node) IfNode {
 struct ForNode {
   pub:
   kind NodeKind
+  init Node
   condition Node
+  increment Node
   consequence Node
+  is_cstyle bool
 }
 
-fn new_for_node(condition Node, consequence Node) ForNode {
+fn new_for_node(cond Node, cons Node) ForNode {
   return ForNode {
     kind: .nd_for
-    condition: condition
-    consequence: consequence
+    condition: cond
+    consequence: cons
+    is_cstyle: false
+  }
+}
+
+fn new_cstyle_for_node(init Node, cond Node, inc Node, cons Node) ForNode {
+  return ForNode {
+    kind: .nd_for
+    init: init
+    condition: cond
+    increment: inc
+    consequence: cons
+    is_cstyle: true
   }
 }

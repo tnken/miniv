@@ -33,6 +33,13 @@ pub fn sequence(node Node) string {
       return 'if $cd $cs'
     }
     ForNode {
+      if it.is_cstyle {
+        ini := sequence(it.init)
+        cd := sequence(it.condition)
+        inc := sequence(it.increment)
+        cs := sequence(it.consequence)
+        return 'for $ini ; $cd ; $inc $cs'
+      }
       cd := sequence(it.condition)
       cs := sequence(it.consequence)
       return 'for $cd $cs'
@@ -106,8 +113,16 @@ fn (p &Parser) stmt() Node {
 
   if p.token.consume('for') {
     exp := p.expr()
-    con := p.stmt()
-    return new_for_node(exp, con)
+    if p.token.consume(';') {
+      cond := p.expr()
+      p.token.expect(';')
+      inc := p.expr()
+      cons := p.stmt()
+      return new_cstyle_for_node(exp, cond, inc, cons)
+    }
+
+    cons := p.stmt()
+    return new_for_node(exp, cons)
   }
 
   node := p.expr()

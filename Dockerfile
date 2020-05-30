@@ -10,5 +10,7 @@ RUN mkdir -p ~/code && \
     cd v && \
     make && \
     ~/code/v/v symlink
-
+    
+WORKDIR /project
 ENTRYPOINT ["/bin/bash"]
+

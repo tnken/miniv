@@ -146,12 +146,18 @@ fn test_for() {
   cases := [
     Case{'a := 1 for a < 10 a = a + 1 a', 10},
     Case{'a := 11 for a < 10 a = a + 1 a', 11},
-    Case{'a := 11 for a > 0 a = a - 1 a', 0}
+    Case{'a := 11 for a > 0 a = a - 1 a', 0},
+    Case{'a := 0 for i := 0; i < 3; i=i+1 a=a+1 a', 3},
+    Case{'a := 0 for i := 0; i < 3; i=i+1 a=a+2 a', 6},
+    Case{'a := 0 for i := 0; i < 10; i=i+1 a=a+1 a', 10}
+    Case{'a := 10 for i := 5; i > 0; i=i-1 a=a+1 a', 15},
+    Case{'a := 0 for i := 0; i < 100; i=i+10 a=a+1 a', 10},
   ]
 
    for idx, c in cases {
     expected := c.expecting
     output := compile(c.input)
+    // println(output)
     assert expected == output
     display_result(idx, expected == output)
   }
