@@ -30,6 +30,7 @@ struct Cgen {
   p parser.Parser
   mut:
   if_counter int
+  for_counter int
 }
 
 fn (cg Cgen) gen_lvar(node parser.Node) {
@@ -74,6 +75,15 @@ fn (mut cg Cgen) gen(node parser.Node) {
       println('  push %rdi')
       return
     }
+    parser.DeclareNode {
+      cg.gen_lvar(it.lhs)
+      cg.gen(it.rhs)
+      println('  pop %rdi')
+      println('  pop %rax')
+      println('  mov %rdi, (%rax)')
+      println('  push %rdi')
+      return
+    }
     parser.IfNode {
       cg.gen(it.condition)
       println('  pop %rax')
@@ -93,6 +103,17 @@ fn (mut cg Cgen) gen(node parser.Node) {
 
       cg.if_counter++
       return
+    }
+    parser.ForNode {
+      println('LSTART$cg.for_counter:')
+      cg.gen(it.condition)
+      println('  pop %rax')
+      println('  cmp $0, %rax')
+      println('  je LEND$cg.for_counter')
+      cg.gen(it.consequence)
+      println('  jmp LSTART$cg.for_counter')
+      println('LEND$cg.for_counter:')
+      cg.for_counter++
     }
     parser.InfixNode {
       cg.gen(it.lhs)

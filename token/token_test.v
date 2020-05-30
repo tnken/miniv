@@ -29,6 +29,7 @@ fn test_tokenizer() {
     'b := 1',
     'c := 3 c',
     'hoge := 1'
+    'a:=1 a=a+2 a'
     'return 1',
     'return 3+2'
   ]
@@ -112,6 +113,18 @@ fn test_tokenizer() {
       ET{.eof}
     ],
     [
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, ':='},
+      ET{.num, 1, ''},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, '='},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, '+'},
+      ET{.num, 2, ''},
+      ET{.ident, 0, 'a'},
+      ET{.eof}
+    ],
+    [
       ET{.reserved, 0, 'return'},
       ET{.num, 1, ''},
       ET{.eof}
@@ -173,6 +186,49 @@ fn test_if_tokenize() {
       ET{.reserved, 0, 'else'},
       ET{.reserved, 0, 'return'},
       ET{.num, 3, ''},
+      ET{.eof}
+   ]
+  ]
+
+  for i, input in inputs {
+    mut tok := token.tokenize(input)
+    mut j := 0
+
+    for tok.kind != .eof {
+      expected := expecting[i][j++]
+      assert expected.kind == tok.kind
+      if expected.kind == .num {
+        assert expected.val == tok.val
+      } else {
+        assert expected.str == tok.str
+      }
+      tok = tok.next
+    }
+  }
+}
+
+
+fn test_for_tokenize() {
+  inputs := [
+    'a:=1 for a<10 a=a+1 return a',
+  ]
+
+  expecting := [
+   [
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, ':='},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, 'for'},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, '<'},
+      ET{.num, 10, ''},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, '='},
+      ET{.ident, 0, 'a'},
+      ET{.reserved, 0, '+'},
+      ET{.num, 1, ''},
+      ET{.reserved, 0, 'return'},
+      ET{.ident, 0, 'a'},
       ET{.eof}
    ]
   ]

@@ -147,7 +147,15 @@ pub fn tokenize(input string) &Token{
       }
     }
 
-    if sc.pos < sc.input.len-3 {
+    if sc.pos < sc.input.len - 2 {
+      if sc.input[sc.pos..sc.pos+3] == 'for' {
+        cur = new_token(.reserved, cur, 'for')
+        sc.scan_advance(3)
+        continue
+      }
+    }
+
+    if sc.pos < sc.input.len - 3 {
       if sc.input[sc.pos..sc.pos+4] == 'else' {
         cur = new_token(.reserved, cur, 'else')
         sc.scan_advance(4)
@@ -155,7 +163,7 @@ pub fn tokenize(input string) &Token{
       }
     }
 
-    if sc.pos < (sc.input.len - 'return'.len) {
+    if sc.pos < (sc.input.len - 5) {
       if sc.input[sc.pos..sc.pos+6] == 'return' {
         cur = new_token(.reserved, cur, 'return')
         sc.scan_advance(6)
@@ -163,7 +171,7 @@ pub fn tokenize(input string) &Token{
       }
     }
 
-    if sc.ch.str() in '+-*/()<>' {
+    if sc.ch.str() in '+-*/()<>=' {
       cur = new_token(.reserved, cur, sc.ch.str())
       sc.scan_advance(1)
       continue

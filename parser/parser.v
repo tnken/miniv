@@ -2,108 +2,6 @@ module parser
 
 import token
 
-enum NodeKind {
-  add        // +
-  sub        // -
-  mul        // *
-  div        // /
-  num        // number
-  lt         // <
-  le         // <=
-  eq         // ==
-  ne         // !=
-  assign     // :=
-  lvar       // hoge
-  nd_return  // return
-  nd_if
-}
-
-type Node = InfixNode | NumNode | LvarNode | AssignNode | ReturnNode |
-            IfNode
-
-struct InfixNode {
-  pub mut:
-  kind NodeKind
-  str string
-  lhs Node
-  rhs Node
-}
-
-fn new_infix_node(kind NodeKind, str string, lhs Node, rhs Node) Node {
-  return InfixNode{kind, str, lhs, rhs}
-}
-
-struct NumNode {
-  pub mut:
-  kind NodeKind
-  val int
-}
-
-fn new_num_node(val int) Node {
-  return NumNode{.num, val}
-}
-
-struct LvarNode {
-  pub mut:
-  kind NodeKind
-  str string
-  offset int
-}
-
-fn new_lvar_node(str string, offset int) Node {
-  return LvarNode{.lvar, str, offset}
-}
-
-struct AssignNode {
-  pub:
-  kind NodeKind
-  lhs Node
-  rhs Node
-}
-
-fn new_assign_node(lhs Node, rhs Node) Node {
-  return AssignNode{.assign, lhs, rhs}
-}
-
-struct ReturnNode {
-  pub:
-  kind NodeKind
-  rhs Node
-}
-
-fn new_return_node(rhs Node) Node {
-  return ReturnNode{.nd_return, rhs}
-}
-
-// if <condition> <consequence> else <alternative>
-struct IfNode {
-  pub:
-  kind NodeKind
-  condition Node
-  consequence Node
-  alternative Node
-  has_alternative bool
-}
-
-fn new_if_node(cdt Node, cse Node) IfNode {
-  return IfNode{
-    kind: .nd_if
-    condition: cdt
-    consequence: cse
-    has_alternative: false
-  }
-}
-
-fn new_if_eles_node(cdt Node, cse Node, alt Node) IfNode {
-  return IfNode{
-    kind: .nd_if
-    condition: cdt
-    consequence: cse
-    alternative: alt
-    has_alternative: true
-  }
-}
-
 pub fn sequence(node Node) string {
   match node {
     NumNode { return it.val.str() }
@@ -113,6 +11,11 @@ pub fn sequence(node Node) string {
       l := sequence(it.lhs)
       r := sequence(it.rhs)
       return '$l := $r'
+    }
+    DeclareNode {
+      l := sequence(it.lhs)
+      r := sequence(it.rhs)
+      return '$l = $r'
     }
     InfixNode {
       l := sequence(it.lhs)
@@ -128,6 +31,11 @@ pub fn sequence(node Node) string {
         return 'if $cd $cs else $alt'
       }
       return 'if $cd $cs'
+    }
+    ForNode {
+      cd := sequence(it.condition)
+      cs := sequence(it.consequence)
+      return 'for $cd $cs'
     }
   }
 }
@@ -195,6 +103,13 @@ fn (p &Parser) stmt() Node {
     }
     return new_if_node(exp, con)
   }
+
+  if p.token.consume('for') {
+    exp := p.expr()
+    con := p.stmt()
+    return new_for_node(exp, con)
+  }
+
   node := p.expr()
   return node
 }
@@ -206,8 +121,11 @@ fn (p &Parser) expr() Node {
 
 fn (p &Parser) assign() Node {
   mut node := p.equality()
+  // TODO: divide roles of := and =
   if p.token.consume(':=') {
     node = new_assign_node(node, p.assign())
+  } else if p.token.consume('=') {
+    node = new_declare_node(node, p.assign())
   }
   return node
 }

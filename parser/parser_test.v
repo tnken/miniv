@@ -48,3 +48,25 @@ fn test_parser() {
     assert out == expecting[i]
   }
 }
+
+fn test_for_parsing(){
+  inputs := [
+    'a:=1 for a<10 a=a+1 a'
+  ]
+
+  expecting := [
+    'a := 1 for a < 10 a = a + 1 a'
+  ]
+
+  for i, input in inputs {
+    tok := token.tokenize(input)
+    p := parser.new_parser(tok)
+    p.parse()
+    mut out := parser.sequence(p.program[0])
+    for node in p.program[1..] {
+      out += ' ' + parser.sequence(node)
+    }
+    println(out)
+    assert out == expecting[i]
+  }
+}

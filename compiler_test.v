@@ -110,6 +110,7 @@ fn test_return() {
     Case{'hoge:=1 fuga:=2 poge := 3 return (hoge+fuga)*2', 6}
     Case{'a:=1 return a 3', 1},
     Case{'a:=1 return a hoge := 2 return hoge', 1},
+    Case{'a:=1 a=a+1 a=a+1 return a a=a+1', 3},
   ]
 
    for idx, c in cases {
@@ -137,7 +138,21 @@ fn test_if() {
     expected := c.expecting
     output := compile(c.input)
     assert expected == output
-    println(output)
+    display_result(idx, expected == output)
+  }
+}
+
+fn test_for() {
+  cases := [
+    Case{'a := 1 for a < 10 a = a + 1 a', 10},
+    Case{'a := 11 for a < 10 a = a + 1 a', 11},
+    Case{'a := 11 for a > 0 a = a - 1 a', 0}
+  ]
+
+   for idx, c in cases {
+    expected := c.expecting
+    output := compile(c.input)
+    assert expected == output
     display_result(idx, expected == output)
   }
 }
