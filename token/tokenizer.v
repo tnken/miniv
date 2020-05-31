@@ -120,56 +120,34 @@ pub fn tokenize(input string) &Token{
       continue
     }
 
-    if sc.pos < sc.input.len-1 {
-      target := sc.input[sc.pos..sc.pos+2]
-      if  target == '==' || target == '!=' {
-        cur = new_token(.reserved, cur, target)
-        sc.scan_advance(2)
-        continue
-      }
-
-      if target == '<=' || target == '>=' {
-        cur = new_token(.reserved, cur, target)
-        sc.scan_advance(2)
-        continue
-      }
-
-      if target == ':=' {
-        cur = new_token(.reserved, cur, target)
-        sc.scan_advance(2)
-        continue
-      }
-
-      if target == 'if' {
-        cur = new_token(.reserved, cur, target)
-        sc.scan_advance(2)
-        continue
+    operators := ['==', '!=', '<=', '>=', ':=']
+    mut should_continue := false
+    for o in operators {
+      if sc.pos < sc.input.len - (o.len-1) {
+        target := sc.input[sc.pos..sc.pos+o.len]
+        if target == o {
+          cur = new_token(.reserved, cur, o)
+          sc.scan_advance(o.len)
+          should_continue = true
+          break
+        }
       }
     }
+    if should_continue { continue }
 
-    if sc.pos < sc.input.len - 2 {
-      if sc.input[sc.pos..sc.pos+3] == 'for' {
-        cur = new_token(.reserved, cur, 'for')
-        sc.scan_advance(3)
-        continue
+    keywords := ['if', 'for', 'else', 'return']
+    for k in keywords {
+      if sc.pos < sc.input.len - (k.len-1) {
+        target := sc.input[sc.pos..sc.pos+k.len]
+        if target == k {
+          cur = new_token(.reserved, cur, k)
+          sc.scan_advance(k.len)
+          should_continue = true
+          break
+        }
       }
     }
-
-    if sc.pos < sc.input.len - 3 {
-      if sc.input[sc.pos..sc.pos+4] == 'else' {
-        cur = new_token(.reserved, cur, 'else')
-        sc.scan_advance(4)
-        continue
-      }
-    }
-
-    if sc.pos < (sc.input.len - 5) {
-      if sc.input[sc.pos..sc.pos+6] == 'return' {
-        cur = new_token(.reserved, cur, 'return')
-        sc.scan_advance(6)
-        continue
-      }
-    }
+    if should_continue { continue }
 
     if sc.ch.str() in '+-*/()<>=;{}' {
       cur = new_token(.reserved, cur, sc.ch.str())
