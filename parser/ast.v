@@ -1,137 +1,139 @@
 module parser
 
-type Node = InfixNode | NumNode | LvarNode | AssignNode | ReturnNode |
-            IfNode | ForNode | DeclareNode | BlockNode
+type Node = AssignNode | BlockNode | DeclareNode | ForNode | IfNode | InfixNode | LvarNode |
+	NumNode | ReturnNode
 
 enum InfixKind {
-  add // +
-  sub // -
-  mul // *
-  div // /
-  lt  // <
-  le  // <=
-  eq  // ==
-  ne  // !=
+	add
+	sub
+	mul
+	div
+	lt
+	le
+	eq
+	ne
 }
 
 struct InfixNode {
-  pub mut:
-  kind InfixKind
-  str string
-  lhs Node
-  rhs Node
+pub mut:
+	kind InfixKind
+	str  string
+	lhs  Node
+	rhs  Node
 }
 
-fn new_infix_node(kind InfixKind, str string, lhs Node, rhs Node) Node {
-  return InfixNode{kind, str, lhs, rhs}
+fn new_infix_node(kind InfixKind, str string, lhs, rhs Node) Node {
+	return InfixNode{kind, str, lhs, rhs}
 }
 
 struct NumNode {
-  pub mut:
-  val int
+pub mut:
+	val int
 }
 
 fn new_num_node(val int) Node {
-  return NumNode{val}
+	return NumNode{val}
 }
 
 struct LvarNode {
-  pub mut:
-  str string
-  offset int
+pub mut:
+	str    string
+	offset int
 }
 
 fn new_lvar_node(str string, offset int) Node {
-  return LvarNode{str, offset}
+	return LvarNode{str, offset}
 }
 
 struct AssignNode {
-  pub:
-  lhs Node
-  rhs Node
+pub:
+	lhs Node
+	rhs Node
 }
 
-fn new_assign_node(lhs Node, rhs Node) Node {
-  return AssignNode{lhs, rhs}
+fn new_assign_node(lhs, rhs Node) Node {
+	return AssignNode{lhs, rhs}
 }
 
 struct DeclareNode {
-  pub:
-  lhs Node
-  rhs Node
+pub:
+	lhs Node
+	rhs Node
 }
 
-fn new_declare_node(lhs Node, rhs Node) Node {
-  return DeclareNode{lhs, rhs}
+fn new_declare_node(lhs, rhs Node) Node {
+	return DeclareNode{lhs, rhs}
 }
 
 struct ReturnNode {
-  pub:
-  rhs Node
+pub:
+	rhs Node
 }
 
 fn new_return_node(rhs Node) Node {
-  return ReturnNode{rhs}
+	return ReturnNode{rhs}
 }
 
 // if <condition> <consequence> else <alternative>
 struct IfNode {
-  pub:
-  condition Node
-  consequence Node
-  alternative Node
-  has_alternative bool
+pub:
+	condition       Node
+	consequence     Node
+	alternative     Node
+	has_alternative bool
 }
 
-fn new_if_node(cdt Node, cse Node) IfNode {
-  return IfNode{
-    condition: cdt
-    consequence: cse
-    has_alternative: false
-  }
+fn new_if_node(cdt, cse Node) IfNode {
+	return IfNode{
+		condition: cdt
+		consequence: cse
+		has_alternative: false
+	}
 }
 
-fn new_if_eles_node(cdt Node, cse Node, alt Node) IfNode {
-  return IfNode{
-    condition: cdt
-    consequence: cse
-    alternative: alt
-    has_alternative: true
-  }
+fn new_if_eles_node(cdt, cse, alt Node) IfNode {
+	return IfNode{
+		condition: cdt
+		consequence: cse
+		alternative: alt
+		has_alternative: true
+	}
 }
 
 struct ForNode {
-  pub:
-  init Node
-  condition Node
-  increment Node
-  consequence Node
-  is_cstyle bool
+pub:
+	init        Node
+	condition   Node
+	increment   Node
+	consequence Node
+	is_cstyle   bool
 }
 
-fn new_for_node(cond Node, cons Node) ForNode {
-  return ForNode {
-    condition: cond
-    consequence: cons
-    is_cstyle: false
-  }
+fn new_for_node(cond, cons Node) ForNode {
+	return ForNode{
+		condition: cond
+		consequence: cons
+		is_cstyle: false
+	}
 }
 
-fn new_cstyle_for_node(init Node, cond Node, inc Node, cons Node) ForNode {
-  return ForNode {
-    init: init
-    condition: cond
-    increment: inc
-    consequence: cons
-    is_cstyle: true
-  }
+fn new_cstyle_for_node(init, cond, inc, cons Node) ForNode {
+	return ForNode{
+		init: init
+		condition: cond
+		increment: inc
+		consequence: cons
+		is_cstyle: true
+	}
 }
 
 struct BlockNode {
-  pub:
-  stmts []Node
+pub:
+	stmts []Node
 }
 
 fn new_block_node(stmts []Node) BlockNode {
-  return BlockNode{stmts: stmts}
+	return BlockNode{
+		stmts: stmts
+	}
 }
