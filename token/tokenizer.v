@@ -40,6 +40,10 @@ fn (mut s Scanner) scan_advance(i int) bool {
 	return true
 }
 
+fn is_alnum(b byte) bool{
+	return b.is_letter() || b.is_digit()
+}
+
 fn (mut s Scanner) scan_num() int {
 	start := s.pos
 	for s.ch.is_digit() && s.pos < s.input.len {
@@ -138,7 +142,14 @@ pub fn tokenize(input string) &Token {
 		for k in keywords {
 			if sc.pos < sc.input.len - (k.len - 1) {
 				target := sc.input[sc.pos..sc.pos + k.len]
-				if target == k {
+				mut is_lvar := false
+				if sc.pos + k.len < sc.input.len {
+					if is_alnum(sc.input[sc.pos + k.len]) {
+						// ex. iflvar := 3
+						is_lvar = true
+					}
+				}
+				if target == k && !is_lvar {
 					cur = new_token(.reserved, cur, k)
 					sc.scan_advance(k.len)
 					should_continue = true
@@ -149,7 +160,7 @@ pub fn tokenize(input string) &Token {
 		if should_continue {
 			continue
 		}
-		if sc.ch.str() in '+-*/()<>=;{}' {
+		if sc.ch.str() in '+-*/()<>=;{},' {
 			cur = new_token(.reserved, cur, sc.ch.str())
 			sc.scan_advance(1)
 			continue
@@ -161,8 +172,7 @@ pub fn tokenize(input string) &Token {
 		}
 		if sc.ch.is_letter() {
 			l := sc.pos
-			for sc.ch.is_letter() && sc.scan_advance(1) {
-			}
+			for (is_alnum(sc.ch) || sc.ch == `_`) && sc.scan_advance(1) {}
 			cur = new_token(.ident, cur, sc.input[l..sc.pos])
 			continue
 		}

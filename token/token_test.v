@@ -30,8 +30,12 @@ fn test_tokenizer() {
 		'c := 3 c',
 		'hoge := 1',
 		'a:=1 a=a+2 a',
+		'tes_1 := 3'
 		'return 1',
-		'return 3+2'
+		'return 3+2',
+		'returnd := 1',
+		'ifs := 1',
+		'elseval := 1'
 	]
 	expecting := [
 		[
@@ -124,6 +128,12 @@ fn test_tokenizer() {
 			ET{.eof}
 		],
 		[
+			ET{.ident, 0, 'tes_1'},
+			ET{.reserved, 0, ':='},
+			ET{.num, 3, ''},
+			ET{.eof, 0, ''},
+		],
+		[
 			ET{.reserved, 0, 'return'},
 			ET{.num, 1, ''},
 			ET{.eof}
@@ -133,6 +143,24 @@ fn test_tokenizer() {
 			ET{.num, 3, ''},
 			ET{.reserved, 0, '+'},
 			ET{.num, 2, ''},
+			ET{.eof}
+		],
+		[
+			ET{.ident, 0, 'returnd'},
+			ET{.reserved, 0, ':='},
+			ET{.num, 1, ''},
+			ET{.eof}
+		],
+		[
+			ET{.ident, 0, 'ifs'},
+			ET{.reserved, 0, ':='},
+			ET{.num, 1, ''},
+			ET{.eof}
+		],
+		[
+			ET{.ident, 0, 'elseval'},
+			ET{.reserved, 0, ':='},
+			ET{.num, 1, ''},
 			ET{.eof}
 		]
 	]
@@ -254,6 +282,7 @@ fn test_block_tokenize() {
 			ET{.reserved, 0, '='},
 			ET{.num, 3, ''},
 			ET{.reserved, 0, '}'}
+			ET{.eof}
 		]
 	]
 	for i, input in inputs {
@@ -271,3 +300,39 @@ fn test_block_tokenize() {
 		}
 	}
 }
+
+// fn test_fn_tokenize() {
+// 	inputs := [
+// 		'func1()',
+// 		'func2(1)',
+// 	]
+// 	expecting := [
+// 		[
+// 			ET{.ident, 0, 'func1'},
+// 			ET{.reserved, 0, '('},
+// 			ET{.reserved, 0, ')'},
+// 			ET{.eof}
+// 		],
+// 		// [
+// 		// 	ET{.ident, 0, 'func2'},
+// 		// 	ET{.reserved, 0, '('},
+// 		// 	ET{.num, 0, '1'},
+// 		// 	ET{.reserved, 0, ')'},
+// 		// 	ET{.eof}
+// 		// ]
+// 	]
+// 	for i, input in inputs {
+// 		mut tok := token.tokenize(input)
+// 		mut j := 0
+// 		for tok.kind != .eof {
+// 			expected := expecting[i][j++]
+// 			assert expected.kind == tok.kind
+// 			if expected.kind == .num {
+// 				assert expected.val == tok.val
+// 			} else {
+// 				assert expected.str == tok.str
+// 			}
+// 			tok = tok.next
+// 		}
+// 	}
+// }

@@ -63,17 +63,6 @@ pub fn sequence(node Node) string {
 	}
 }
 
-struct Lvar {
-pub mut:
-	name   string
-	offset int
-	next   &Lvar
-}
-
-fn new_lvar(name string, offset int) &Lvar {
-	return &Lvar{name, offset, 0}
-}
-
 pub fn (p &Parser) get_lvar_offset(name string) int {
 	mut l := p.head_lvar
 	for {
