@@ -2,67 +2,6 @@ module parser
 
 import token
 
-pub fn sequence(node Node) string {
-	match node {
-		NumNode {
-			return it.val.str()
-		}
-		LvarNode {
-			return it.str
-		}
-		ReturnNode {
-			return 'return ${sequence(it.rhs)}'
-		}
-		AssignNode {
-			l := sequence(it.lhs)
-			r := sequence(it.rhs)
-			return '$l := $r'
-		}
-		DeclareNode {
-			l := sequence(it.lhs)
-			r := sequence(it.rhs)
-			return '$l = $r'
-		}
-		InfixNode {
-			l := sequence(it.lhs)
-			r := sequence(it.rhs)
-			return '$l $it.str $r'
-		}
-		IfNode {
-			cd := sequence(it.condition)
-			cs := sequence(it.consequence)
-			if it.has_alternative {
-				alt := sequence(it.alternative)
-				return 'if $cd $cs else $alt'
-			}
-			return 'if $cd $cs'
-		}
-		ForNode {
-			if it.is_cstyle {
-				ini := sequence(it.init)
-				cd := sequence(it.condition)
-				inc := sequence(it.increment)
-				cs := sequence(it.consequence)
-				return 'for $ini ; $cd ; $inc $cs'
-			}
-			cd := sequence(it.condition)
-			cs := sequence(it.consequence)
-			return 'for $cd $cs'
-		}
-		BlockNode {
-			if it.stmts.len > 0 {
-				mut str := '{ '
-				for stmt in it.stmts[..(it.stmts.len - 1)] {
-					str += sequence(stmt) + ' '
-				}
-				str += sequence(it.stmts[it.stmts.len - 1])
-				return str + ' }'
-			}
-			return ''
-		}
-	}
-}
-
 pub fn (p &Parser) get_lvar_offset(name string) int {
 	mut l := p.head_lvar
 	for {
@@ -107,6 +46,13 @@ fn (p &Parser) program() []Node {
 }
 
 fn (p &Parser) stmt() Node {
+	if p.token.consume('fn') {
+		name := p.token.expect_ident()
+		p.token.expect('(')
+		p.token.expect(')')
+		block := p.stmt()
+		return new_func_node(name, block)
+	}
 	if p.token.consume('return') {
 		return new_return_node(p.equality())
 	}

@@ -103,6 +103,15 @@ pub fn (t &Token) expect(op string) {
 	t.next_token()
 }
 
+pub fn (t &Token) expect_ident() string {
+	if t.kind != .ident {
+		panic('error: not expected identifier')
+	}
+	s := t.str
+	t.next_token()
+	return s
+}
+
 pub fn (t &Token) expect_number() int {
 	if t.kind != .num {
 		panic('error: not expected operator')
@@ -138,7 +147,7 @@ pub fn tokenize(input string) &Token {
 		if should_continue {
 			continue
 		}
-		keywords := ['if', 'for', 'else', 'return']
+		keywords := ['if', 'for', 'else', 'return', 'fn']
 		for k in keywords {
 			if sc.pos < sc.input.len - (k.len - 1) {
 				target := sc.input[sc.pos..sc.pos + k.len]

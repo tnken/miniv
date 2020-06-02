@@ -301,38 +301,50 @@ fn test_block_tokenize() {
 	}
 }
 
-// fn test_fn_tokenize() {
-// 	inputs := [
-// 		'func1()',
-// 		'func2(1)',
-// 	]
-// 	expecting := [
-// 		[
-// 			ET{.ident, 0, 'func1'},
-// 			ET{.reserved, 0, '('},
-// 			ET{.reserved, 0, ')'},
-// 			ET{.eof}
-// 		],
-// 		// [
-// 		// 	ET{.ident, 0, 'func2'},
-// 		// 	ET{.reserved, 0, '('},
-// 		// 	ET{.num, 0, '1'},
-// 		// 	ET{.reserved, 0, ')'},
-// 		// 	ET{.eof}
-// 		// ]
-// 	]
-// 	for i, input in inputs {
-// 		mut tok := token.tokenize(input)
-// 		mut j := 0
-// 		for tok.kind != .eof {
-// 			expected := expecting[i][j++]
-// 			assert expected.kind == tok.kind
-// 			if expected.kind == .num {
-// 				assert expected.val == tok.val
-// 			} else {
-// 				assert expected.str == tok.str
-// 			}
-// 			tok = tok.next
-// 		}
-// 	}
-// }
+fn test_fn_tokenize() {
+	inputs := [
+		'func1()',
+		'func2(1)',
+		'fn func3() { return 2 }'
+	]
+	expecting := [
+		[
+			ET{.ident, 0, 'func1'},
+			ET{.reserved, 0, '('},
+			ET{.reserved, 0, ')'},
+			ET{.eof}
+		],
+		[
+			ET{.ident, 0, 'func2'},
+			ET{.reserved, 0, '('},
+			ET{.num, 1, ''},
+			ET{.reserved, 0, ')'},
+			ET{.eof}
+		],
+		[
+			ET{.reserved, 0, 'fn'},
+			ET{.ident, 0, 'func3'},
+			ET{.reserved, 0, '('},
+			ET{.reserved, 0, ')'},
+			ET{.reserved, 0, '{'},
+			ET{.reserved, 0, 'return'},
+			ET{.num, 2, ''},
+			ET{.reserved, 0, '}'},
+			ET{.eof}
+		]
+	]
+	for i, input in inputs {
+		mut tok := token.tokenize(input)
+		mut j := 0
+		for tok.kind != .eof {
+			expected := expecting[i][j++]
+			assert expected.kind == tok.kind
+			if expected.kind == .num {
+				assert expected.val == tok.val
+			} else {
+				assert expected.str == tok.str
+			}
+			tok = tok.next
+		}
+	}
+}

@@ -1,5 +1,71 @@
-import parser
+module parser
+
 import token
+
+fn sequence(node Node) string {
+	match node {
+		NumNode {
+			return it.val.str()
+		}
+		LvarNode {
+			return it.str
+		}
+		ReturnNode {
+			return 'return ${sequence(it.rhs)}'
+		}
+		AssignNode {
+			l := sequence(it.lhs)
+			r := sequence(it.rhs)
+			return '$l := $r'
+		}
+		DeclareNode {
+			l := sequence(it.lhs)
+			r := sequence(it.rhs)
+			return '$l = $r'
+		}
+		InfixNode {
+			l := sequence(it.lhs)
+			r := sequence(it.rhs)
+			return '$l $it.str $r'
+		}
+		IfNode {
+			cd := sequence(it.condition)
+			cs := sequence(it.consequence)
+			if it.has_alternative {
+				alt := sequence(it.alternative)
+				return 'if $cd $cs else $alt'
+			}
+			return 'if $cd $cs'
+		}
+		ForNode {
+			if it.is_cstyle {
+				ini := sequence(it.init)
+				cd := sequence(it.condition)
+				inc := sequence(it.increment)
+				cs := sequence(it.consequence)
+				return 'for $ini ; $cd ; $inc $cs'
+			}
+			cd := sequence(it.condition)
+			cs := sequence(it.consequence)
+			return 'for $cd $cs'
+		}
+		BlockNode {
+			if it.stmts.len > 0 {
+				mut str := '{ '
+				for stmt in it.stmts[..(it.stmts.len - 1)] {
+					str += sequence(stmt) + ' '
+				}
+				str += sequence(it.stmts[it.stmts.len - 1])
+				return str + ' }'
+			}
+			return ''
+		}
+		FuncNode {
+			block := sequence(it.block)
+			return 'fn $it.name ( ) $block'
+		}
+	}
+}
 
 fn test_parser() {
 	inputs := [
@@ -38,9 +104,9 @@ fn test_parser() {
 		tok := token.tokenize(input)
 		p := parser.new_parser(tok)
 		p.parse()
-		mut out := parser.sequence(p.program[0])
+		mut out := sequence(p.program[0])
 		for node in p.program[1..] {
-			out += ' ' + parser.sequence(node)
+			out += ' ' + sequence(node)
 		}
 		assert out == expecting[i]
 	}
@@ -61,9 +127,28 @@ fn test_for_parsing() {
 		tok := token.tokenize(input)
 		p := parser.new_parser(tok)
 		p.parse()
-		mut out := parser.sequence(p.program[0])
+		mut out := sequence(p.program[0])
 		for node in p.program[1..] {
-			out += ' ' + parser.sequence(node)
+			out += ' ' + sequence(node)
+		}
+		assert out == expecting[i]
+	}
+}
+
+fn test_func_parsing() {
+	inputs := [
+		'fn func1() {return 1}',
+	]
+	expecting := [
+		'fn func1 ( ) { return 1 }',
+	]
+	for i, input in inputs {
+		tok := token.tokenize(input)
+		p := parser.new_parser(tok)
+		p.parse()
+		mut out := sequence(p.program[0])
+		for node in p.program[1..] {
+			out += ' ' + sequence(node)
 		}
 		assert out == expecting[i]
 	}

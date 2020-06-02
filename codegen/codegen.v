@@ -2,28 +2,25 @@ module codegen
 
 import parser
 
-fn ini() {
-	println('.global main')
-	println('main:')
+fn prologue() {
 	println('  push %rbp')
 	println('  mov %rsp, %rbp')
 	println('  sub $208, %rsp')
 }
 
-fn end() {
+fn epilogue() {
 	println('  mov %rbp, %rsp')
 	println('  pop %rbp')
 	println('  ret')
 }
 
 pub fn gen_program(p &parser.Parser) {
-	ini()
+	println('.global main')
 	cg := Cgen{p}
 	for node in p.program {
 		cg.gen(node)
 		println('  pop %rax')
 	}
-	end()
 }
 
 struct Cgen {
@@ -63,7 +60,7 @@ fn (mut cg Cgen) gen(node parser.Node) {
 		parser.ReturnNode {
 			cg.gen(it.rhs)
 			println('  pop %rax')
-			end()
+			epilogue()
 			return
 		}
 		parser.AssignNode {
@@ -134,6 +131,12 @@ fn (mut cg Cgen) gen(node parser.Node) {
 				println('  pop %rax')
 			}
 			return
+		}
+		parser.FuncNode {
+			println('$it.name:')
+			prologue()
+			cg.gen(it.block)
+			epilogue()
 		}
 		parser.InfixNode {
 			cg.gen(it.lhs)

@@ -1,7 +1,7 @@
 module parser
 
 type Node = AssignNode | BlockNode | DeclareNode | ForNode | IfNode | InfixNode | LvarNode |
-	NumNode | ReturnNode
+	NumNode | ReturnNode | FuncNode
 
 enum InfixKind {
 	add
@@ -135,5 +135,19 @@ pub:
 fn new_block_node(stmts []Node) BlockNode {
 	return BlockNode{
 		stmts: stmts
+	}
+}
+
+struct FuncNode {
+pub:
+	name string
+	args []Node
+	block Node
+}
+
+fn new_func_node(name string, block Node) FuncNode {
+	return FuncNode {
+		name: name
+		block: block
 	}
 }
