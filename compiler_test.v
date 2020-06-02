@@ -16,11 +16,16 @@ fn compile(source string) int {
 	return res.exit_code
 }
 
-fn display_result(idx int, ok bool) {
-	if ok {
-		println('[ok]: ${idx}')
-	} else {
-		println('[faile]: ${idx}')
+fn exec(cases []Case) {
+	for c in cases {
+		expected := c.expecting
+		source := '
+			fn main() {
+				$c.input
+			}
+		'
+		output := compile(source)
+		assert expected == output
 	}
 }
 
@@ -32,19 +37,13 @@ struct Case {
 fn test_calculation() {
 	cases := [
 		Case{'2', 2},
-		Case{'1+0', 1},
-		Case{'1-1', 0},
-		Case{'3-2+3', 4},
-		Case{'3+3-4', 2},
-		Case{'3+3-4+3', 5},
+		Case{'1+2', 3},
 		Case{'1*2', 2},
 		Case{'4/2', 2},
 		Case{'(1+1)*5', 10},
 		Case{'(2+2)/2', 2},
 		Case{'10-(3+3)', 4},
-		Case{'6/2+3*(2+5/(1+6))-2', 7},
 		Case{'-4+16', 12},
-		Case{'-((8+8)/2) + 12', 4},
 		Case{'1 == 1', 1},
 		Case{'0 == 1', 0},
 		Case{'1 == 0', 0},
@@ -70,12 +69,7 @@ fn test_calculation() {
 		Case{'1 <= 0', 0},
 		Case{'0 <= 0', 1}
 	]
-	for idx, c in cases {
-		expected := c.expecting
-		output := compile(c.input)
-		assert expected == output
-		display_result(idx, expected == output)
-	}
+	exec(cases)
 }
 
 fn test_lvar() {
@@ -87,12 +81,7 @@ fn test_lvar() {
 		Case{'hoge := 1 fuga := 2 hoge+fuga', 3},
 		Case{'hoge := 1 fuga := 2 vv := fuga-hoge (hoge+fuga)*2-vv', 5}
 	]
-	for idx, c in cases {
-		expected := c.expecting
-		output := compile(c.input)
-		assert expected == output
-		display_result(idx, expected == output)
-	}
+	exec(cases)
 }
 
 fn test_return() {
@@ -107,12 +96,7 @@ fn test_return() {
 		Case{'a:=1 return a hoge := 2 return hoge', 1},
 		Case{'a:=1 a=a+1 a=a+1 return a a=a+1', 3}
 	]
-	for idx, c in cases {
-		expected := c.expecting
-		output := compile(c.input)
-		assert expected == output
-		display_result(idx, expected == output)
-	}
+	exec(cases)
 }
 
 fn test_if() {
@@ -129,12 +113,7 @@ fn test_if() {
 		Case{'a:=2 if 1 {b:=1 c:=1 a=a+b+c} a', 4},
 		Case{'a:=2 if 0 {b:=1 c:=1 a=a+b+c} else {d:=4 a=a+d} a', 6}
 	]
-	for idx, c in cases {
-		expected := c.expecting
-		output := compile(c.input)
-		assert expected == output
-		display_result(idx, expected == output)
-	}
+	exec(cases)
 }
 
 fn test_for() {
@@ -149,10 +128,5 @@ fn test_for() {
 		Case{'a := 0 for i := 0; i < 100; i=i+10 a=a+1 a', 10},
 		Case{'a:=0 for i:=0; i<10; i=i+1 { b:=1 c:=1 a = a+b+c } a', 20}
 	]
-	for idx, c in cases {
-		expected := c.expecting
-		output := compile(c.input)
-		assert expected == output
-		display_result(idx, expected == output)
-	}
+	exec(cases)
 }
