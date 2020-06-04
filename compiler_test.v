@@ -131,7 +131,7 @@ fn test_for() {
 
 fn test_files() {
 	dir := './test'
-	input_paths := os.walk_ext(dir, '_input.txt')
+	input_paths := os.walk_ext(dir, '_input.vv')
 	for input_path in input_paths {
 		source := os.read_file(input_path.trim_space()) or {
 			println('Failed to open $input_path')

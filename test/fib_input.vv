@@ -1,0 +1,56 @@
+
+fn fib1(n) {
+	if n == 1 {
+		return 0
+	}
+	if n == 2 {
+		return 1
+	}
+
+	return fib1(n-1) + fib1(n-2)
+}
+
+fn fib2(x) {
+	a := 0
+	b := 1
+
+	if x == 1 {
+		return a
+	}
+	if x == 2 {
+		return b
+	}
+
+	for i:=0; i<x-2; i=i+1 {
+		tmp := a
+		a = b
+		b = tmp + b
+	}
+	return b
+}
+
+fn main() {
+	println(fib1(1))
+	println(fib1(2))
+	println(fib1(3))
+	println(fib1(4))
+	println(fib1(5))
+	println(fib1(6))
+	println(fib1(7))
+	println(fib1(8))
+	println(fib1(9))
+	println(fib1(10))
+	println(fib1(11))
+
+	println(fib2(1))
+	println(fib2(2))
+	println(fib2(3))
+	println(fib2(4))
+	println(fib2(5))
+	println(fib2(6))
+	println(fib2(7))
+	println(fib2(8))
+	println(fib2(9))
+	println(fib2(10))
+	println(fib2(11))
+}
