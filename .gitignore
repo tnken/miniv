@@ -4,3 +4,4 @@ miniv
 *.dll
 tmp.*
 tmp
+output.txt

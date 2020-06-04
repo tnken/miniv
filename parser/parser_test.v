@@ -62,7 +62,11 @@ fn sequence(node Node) string {
 		}
 		FuncNode {
 			block := sequence(it.block)
-			return 'fn $it.name ( ) $block'
+			arg := sequence(it.args[0])
+			return 'fn $it.name ( $arg ) $block'
+		}
+		FuncCallNode {
+			return '$it.ident ( ) '
 		}
 	}
 }
@@ -137,10 +141,10 @@ fn test_for_parsing() {
 
 fn test_func_parsing() {
 	inputs := [
-		'fn func1() {return 1}',
+		'fn func1(x) {return 1}',
 	]
 	expecting := [
-		'fn func1 ( ) { return 1 }',
+		'fn func1 ( x ) { return 1 }',
 	]
 	for i, input in inputs {
 		tok := token.tokenize(input)

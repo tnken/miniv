@@ -304,8 +304,8 @@ fn test_block_tokenize() {
 fn test_fn_tokenize() {
 	inputs := [
 		'func1()',
-		'func2(1)',
-		'fn func3() { return 2 }'
+		'func2()',
+		'fn func3(x) { return 2 }'
 	]
 	expecting := [
 		[
@@ -317,7 +317,6 @@ fn test_fn_tokenize() {
 		[
 			ET{.ident, 0, 'func2'},
 			ET{.reserved, 0, '('},
-			ET{.num, 1, ''},
 			ET{.reserved, 0, ')'},
 			ET{.eof}
 		],
@@ -325,6 +324,7 @@ fn test_fn_tokenize() {
 			ET{.reserved, 0, 'fn'},
 			ET{.ident, 0, 'func3'},
 			ET{.reserved, 0, '('},
+			ET{.ident, 0, 'x'},
 			ET{.reserved, 0, ')'},
 			ET{.reserved, 0, '{'},
 			ET{.reserved, 0, 'return'},

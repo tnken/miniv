@@ -5,12 +5,12 @@ fn compile(source string) int {
 		println('error: compile error')
 		panic(err)
 	}
-	os.exec('gcc -o tmp tmp.s') or {
-		println('error: compile error')
+	os.exec('gcc -no-pie -o tmp tmp.s') or {
+		println('error: link error')
 		panic(err)
 	}
-	res := os.exec('./tmp') or {
-		println('error: compile error')
+	res := os.exec('./tmp > output.txt') or {
+		println('error: execute error')
 		panic(err)
 	}
 	return res.exit_code
@@ -18,14 +18,12 @@ fn compile(source string) int {
 
 fn exec(cases []Case) {
 	for c in cases {
-		expected := c.expecting
 		source := '
 			fn main() {
 				$c.input
 			}
 		'
-		output := compile(source)
-		assert expected == output
+		assert compile(source) == c.expecting
 	}
 }
 
@@ -79,7 +77,7 @@ fn test_lvar() {
 		Case{'a:=2 b:=1 c:=a-b 0', 0},
 		Case{'a:=1 b:=2 c:=3 a+b+c', 6},
 		Case{'hoge := 1 fuga := 2 hoge+fuga', 3},
-		Case{'hoge := 1 fuga := 2 vv := fuga-hoge (hoge+fuga)*2-vv', 5}
+		Case{'hoge := 1 fuga := 2 vv := fuga-hoge return (hoge+fuga)*2-vv', 5}
 	]
 	exec(cases)
 }
@@ -129,4 +127,27 @@ fn test_for() {
 		Case{'a:=0 for i:=0; i<10; i=i+1 { b:=1 c:=1 a = a+b+c } a', 20}
 	]
 	exec(cases)
+}
+
+fn test_files() {
+	dir := './test'
+	input_paths := os.walk_ext(dir, '_input.txt')
+	for input_path in input_paths {
+		source := os.read_file(input_path.trim_space()) or {
+			println('Failed to open $input_path')
+			return
+		}
+		compile(source)
+
+		expect_file := os.file_name(input_path).split('_')[0] + '_expect.txt'
+		expecting := os.read_file('$dir/$expect_file') or {
+			println('Failed to open $expect_file')
+			return
+		}
+		output := os.read_file('./output.txt') or {
+			println('Failed to open $expect_file')
+			return
+		}
+		assert expecting == output
+	}
 }

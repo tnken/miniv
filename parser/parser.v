@@ -49,9 +49,14 @@ fn (p &Parser) stmt() Node {
 	if p.token.consume('fn') {
 		name := p.token.expect_ident()
 		p.token.expect('(')
-		p.token.expect(')')
+		mut args := []Node{}
+		for !p.token.consume(')'){
+			args << p.primary()
+		}
 		block := p.stmt()
-		return new_func_node(name, block)
+		mut fnode := new_func_node(name, block)
+		fnode.args = args
+		return fnode
 	}
 	if p.token.consume('return') {
 		return new_return_node(p.equality())
@@ -176,11 +181,20 @@ fn (p &Parser) primary() Node {
 		return node
 	}
 	if p.token.kind == .ident {
-		p.tail_lvar.next = new_lvar(p.token.str, p.tail_lvar.offset + 8)
-		p.tail_lvar = p.tail_lvar.next
-		node := new_lvar_node(p.token.str, p.tail_lvar.offset + 8)
+		ident := p.token
 		p.token.next_token()
-		return node
+		if p.token.consume('('){
+			mut fnode := new_func_call_node(ident.str)
+			for !p.token.consume(')'){
+				fnode.args << p.equality()
+			}
+			return fnode
+		} else {
+			p.tail_lvar.next = new_lvar(ident.str, p.tail_lvar.offset + 8)
+			p.tail_lvar = p.tail_lvar.next
+			node := new_lvar_node(ident.str, p.tail_lvar.offset + 8)
+			return node
+		}
 	}
 	return new_num_node(p.token.expect_number())
 }

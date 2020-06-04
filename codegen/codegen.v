@@ -1,6 +1,7 @@
 module codegen
 
 import parser
+import os
 
 fn prologue() {
 	println('  push %rbp')
@@ -15,19 +16,40 @@ fn epilogue() {
 }
 
 pub fn gen_program(p &parser.Parser) {
+	builtin := os.read_file('./builtin.s') or {
+		println('Failed to open builtin.s')
+		return
+	}
+	println(builtin)
 	println('.global main')
-	cg := Cgen{p}
+	println('.text')
+
+	mut cg := Cgen{p}
 	for node in p.program {
 		cg.gen(node)
-		println('  pop %rax')
 	}
 }
 
 struct Cgen {
 	p           parser.Parser
 mut:
-	if_counter  int
-	for_counter int
+	label_seq int
+}
+
+fn (mut cg Cgen) gen_print(node parser.FuncCallNode) {
+	// TODO: increase the number of argument
+	// only one argument is allowed now
+	resi := ['rdi']
+	for i, arg in node.args {
+		cg.gen(arg)
+		println('  pop %rax')
+		println('  mov %rax, %${resi[i]}')
+	}
+	// TODO: to be able to print other type
+	// only number can be printed now
+	println('  call builtin.print_uint')
+	println('  call builtin.print_newline')
+	println('  push %rax')
 }
 
 fn (cg Cgen) gen_lvar(node parser.Node) {
@@ -86,43 +108,43 @@ fn (mut cg Cgen) gen(node parser.Node) {
 			println('  pop %rax')
 			println('  cmp $0, %rax')
 			if it.has_alternative {
-				println('  je LELSE${cg.if_counter}')
+				println('  je LELSE${cg.label_seq}')
 				cg.gen(it.consequence)
-				println('  jmp LEND${cg.if_counter}')
-				println('LELSE${cg.if_counter}:')
+				println('  jmp LEND${cg.label_seq}')
+				println('LELSE${cg.label_seq}:')
 				cg.gen(it.alternative)
 			} else {
-				println('  je LEND${cg.if_counter}')
+				println('  je LEND${cg.label_seq}')
 				cg.gen(it.consequence)
 			}
-			println('LEND${cg.if_counter}:')
-			cg.if_counter++
+			println('LEND${cg.label_seq}:')
+			cg.label_seq++
 			return
 		}
 		parser.ForNode {
 			if it.is_cstyle {
 				cg.gen(it.init)
 				println('  pop %rax')
-				println('LSTART$cg.for_counter:')
+				println('LSTART$cg.label_seq:')
 				cg.gen(it.condition)
 				println('  pop %rax')
 				println('  cmp $0, %rax')
-				println('  je LEND${cg.if_counter}')
+				println('  je LEND${cg.label_seq}')
 				cg.gen(it.consequence)
 				cg.gen(it.increment)
-				println('  jmp LSTART$cg.for_counter')
-				println('LEND$cg.for_counter:')
+				println('  jmp LSTART$cg.label_seq')
+				println('LEND$cg.label_seq:')
 			} else {
-				println('LSTART$cg.for_counter:')
+				println('LSTART$cg.label_seq:')
 				cg.gen(it.condition)
 				println('  pop %rax')
 				println('  cmp $0, %rax')
-				println('  je LEND$cg.for_counter')
+				println('  je LEND$cg.label_seq')
 				cg.gen(it.consequence)
-				println('  jmp LSTART$cg.for_counter')
-				println('LEND$cg.for_counter:')
+				println('  jmp LSTART$cg.label_seq')
+				println('LEND$cg.label_seq:')
 			}
-			cg.for_counter++
+			cg.label_seq++
 			return
 		}
 		parser.BlockNode {
@@ -135,8 +157,29 @@ fn (mut cg Cgen) gen(node parser.Node) {
 		parser.FuncNode {
 			println('$it.name:')
 			prologue()
+			// TODO: extend the number of argument
+			if it.args.len > 0 {
+				cg.gen_lvar(it.args[0])
+				println('  pop %rax')
+				println('  mov %rdi, (%rax)')
+				println('  push %rdi')
+			}
 			cg.gen(it.block)
 			epilogue()
+		}
+		parser.FuncCallNode {
+			if it.ident in ['println'] {
+				cg.gen_print(it)
+				return
+			}
+			resi := ['rdi']
+			for i, arg in it.args {
+				cg.gen(arg)
+				println('  pop %rax')
+				println('  mov %rax, %${resi[i]}')
+			}
+			println('  call $it.ident')
+			println('  push %rax')
 		}
 		parser.InfixNode {
 			cg.gen(it.lhs)
