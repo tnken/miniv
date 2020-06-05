@@ -121,6 +121,19 @@ pub fn (t &Token) expect_number() int {
 	return val
 }
 
+fn primitive_types() []string {
+	return ['int']
+}
+
+pub fn (t &Token) expect_primitive_type() string {
+	if t.kind != .reserved || !(t.str in primitive_types()) {
+		panic('error: not expected type')
+	}
+	str := t.str
+	t.next_token()
+	return str
+}
+
 pub fn tokenize(input string) &Token {
 	head := &Token{
 		next: 0
@@ -131,8 +144,22 @@ pub fn tokenize(input string) &Token {
 		if !sc.skip_whitespace() {
 			continue
 		}
-		operators := ['==', '!=', '<=', '>=', ':=']
 		mut should_continue := false
+		for t in primitive_types() {
+			if sc.pos < sc.input.len - (t.len - 1) {
+				target := sc.input[sc.pos..sc.pos + t.len]
+				if target == t {
+					cur = new_token(.reserved, cur, t)
+					sc.scan_advance(t.len)
+					should_continue = true
+					break
+				}
+			}
+		}
+		if should_continue {
+			continue
+		}
+		operators := ['==', '!=', '<=', '>=', ':=']
 		for o in operators {
 			if sc.pos < sc.input.len - (o.len - 1) {
 				target := sc.input[sc.pos..sc.pos + o.len]

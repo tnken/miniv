@@ -39,10 +39,12 @@ struct LvarNode {
 pub mut:
 	str    string
 	offset int
+	typ Type
+	is_arg bool
 }
 
 fn new_lvar_node(str string, offset int) Node {
-	return LvarNode{str, offset}
+	return LvarNode{str, offset, Type{}, false}
 }
 
 struct AssignNode {
@@ -143,6 +145,8 @@ pub mut:
 	name string
 	args []Node
 	block Node
+	has_return bool
+	return_type Type
 }
 
 fn new_func_node(name string, block Node) FuncNode {

@@ -1,5 +1,5 @@
 
-fn fib1(n) {
+fn fib1(n int) int {
 	if n == 1 {
 		return 0
 	}
@@ -10,7 +10,7 @@ fn fib1(n) {
 	return fib1(n-1) + fib1(n-2)
 }
 
-fn fib2(x) {
+fn fib2(x int) int {
 	a := 0
 	b := 1
 

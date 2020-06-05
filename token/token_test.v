@@ -1,21 +1,22 @@
-import token
+module token
 
 // ExpectedToken
 struct ET {
-	kind token.TokenKind
+	kind TokenKind
 	val  int
 	str  string
 }
 
-fn display_result(idx int, ok bool) {
-	if ok {
-		println('[ok]: ${idx}')
-	} else {
-		println('[faile]: ${idx}')
+fn assert_token(expected ET, tk Token) {
+	assert expected.kind == tk.kind
+	if expected.kind == .num {
+		assert expected.val == tk.val
+	} else if expected.kind == .reserved {
+		assert expected.str == tk.str
 	}
 }
 
-fn test_tokenizer() {
+fn test_calc_tokenize() {
 	input := [
 		' 11   ',
 		' 1 + 1 ',
@@ -165,19 +166,11 @@ fn test_tokenizer() {
 		]
 	]
 	for idx, s in input {
-		mut tk := token.tokenize(s)
+		mut tk := tokenize(s)
 		mut i := 0
 		for tk.kind != .eof {
 			expected := expecting[idx][i++]
-			assert expected.kind == tk.kind
-			display_result(idx, expected.kind == tk.kind)
-			if expected.kind == .num {
-				assert expected.val == tk.val
-				display_result(idx, expected.val == tk.val)
-			} else if expected.kind == .reserved {
-				assert expected.str == tk.str
-				display_result(idx, expected.str == tk.str)
-			}
+			assert_token(expected, tk)
 			tk = tk.next
 		}
 	}
@@ -212,17 +205,12 @@ fn test_if_tokenize() {
 		]
 	]
 	for i, input in inputs {
-		mut tok := token.tokenize(input)
+		mut tk := tokenize(input)
 		mut j := 0
-		for tok.kind != .eof {
+		for tk.kind != .eof {
 			expected := expecting[i][j++]
-			assert expected.kind == tok.kind
-			if expected.kind == .num {
-				assert expected.val == tok.val
-			} else {
-				assert expected.str == tok.str
-			}
-			tok = tok.next
+			assert_token(expected, tk)
+			tk = tk.next
 		}
 	}
 }
@@ -251,16 +239,11 @@ fn test_for_tokenize() {
 		]
 	]
 	for i, input in inputs {
-		mut tok := token.tokenize(input)
+		mut tok := tokenize(input)
 		mut j := 0
 		for tok.kind != .eof {
 			expected := expecting[i][j++]
-			assert expected.kind == tok.kind
-			if expected.kind == .num {
-				assert expected.val == tok.val
-			} else {
-				assert expected.str == tok.str
-			}
+			assert_token(expected, tok)
 			tok = tok.next
 		}
 	}
@@ -290,12 +273,7 @@ fn test_block_tokenize() {
 		mut j := 0
 		for tok.kind != .eof {
 			expected := expecting[i][j++]
-			assert expected.kind == tok.kind
-			if expected.kind == .num {
-				assert expected.val == tok.val
-			} else {
-				assert expected.str == tok.str
-			}
+			assert_token(expected, tok)
 			tok = tok.next
 		}
 	}
@@ -305,7 +283,7 @@ fn test_fn_tokenize() {
 	inputs := [
 		'func1()',
 		'func2()',
-		'fn func3(x) { return 2 }'
+		'fn func3(x int) int { return 2 }'
 	]
 	expecting := [
 		[
@@ -325,7 +303,9 @@ fn test_fn_tokenize() {
 			ET{.ident, 0, 'func3'},
 			ET{.reserved, 0, '('},
 			ET{.ident, 0, 'x'},
+			ET{.reserved, 0, 'int'},
 			ET{.reserved, 0, ')'},
+			ET{.reserved, 0, 'int'},
 			ET{.reserved, 0, '{'},
 			ET{.reserved, 0, 'return'},
 			ET{.num, 2, ''},
@@ -338,12 +318,7 @@ fn test_fn_tokenize() {
 		mut j := 0
 		for tok.kind != .eof {
 			expected := expecting[i][j++]
-			assert expected.kind == tok.kind
-			if expected.kind == .num {
-				assert expected.val == tok.val
-			} else {
-				assert expected.str == tok.str
-			}
+			assert_token(expected, tok)
 			tok = tok.next
 		}
 	}

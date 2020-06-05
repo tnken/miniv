@@ -50,11 +50,34 @@ fn (p &Parser) stmt() Node {
 		name := p.token.expect_ident()
 		p.token.expect('(')
 		mut args := []Node{}
-		for !p.token.consume(')'){
-			args << p.primary()
+		if !p.token.consume(')') {
+			for {
+				lvar := p.primary()
+				match lvar {
+					LvarNode {
+						tp := p.token.expect_primitive_type()
+						it.typ = new_type(tp)
+						it.is_arg = true
+						args << lvar
+					} else {}
+				}
+				if p.token.consume(')') { break }
+				p.token.expect(',')
+			}
+		}
+		mut has_return := false
+		mut typ := Type{}
+		if p.token.str != '{' {
+			tp := p.token.expect_primitive_type()
+			typ = new_type(tp)
+			has_return = true
 		}
 		block := p.stmt()
 		mut fnode := new_func_node(name, block)
+		fnode.has_return = has_return
+		if has_return {
+			fnode.return_type = typ
+		}
 		fnode.args = args
 		return fnode
 	}

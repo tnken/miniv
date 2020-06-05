@@ -8,7 +8,11 @@ fn sequence(node Node) string {
 			return it.val.str()
 		}
 		LvarNode {
-			return it.str
+			if it.is_arg {
+				return '$it.str $it.typ.name'
+			} else {
+				return it.str
+			}
 		}
 		ReturnNode {
 			return 'return ${sequence(it.rhs)}'
@@ -58,15 +62,26 @@ fn sequence(node Node) string {
 				str += sequence(it.stmts[it.stmts.len - 1])
 				return str + ' }'
 			}
-			return ''
+			return '{ }'
 		}
 		FuncNode {
 			block := sequence(it.block)
-			arg := sequence(it.args[0])
-			return 'fn $it.name ( $arg ) $block'
+			// TODO: to fix more briefly
+			if it.args.len > 0 && it.has_return {
+				arg := sequence(it.args[0])
+				return 'fn $it.name ( $arg ) $it.return_type.name $block'
+			} else if it.args.len > 0 && !it.has_return {
+				arg := sequence(it.args[0])
+				return 'fn $it.name ( $arg ) $block'
+			}
+			if it.has_return {
+				return 'fn $it.name ( ) $it.return_type.name $block'
+			} else {
+				return 'fn $it.name ( ) $block'
+			}
 		}
 		FuncCallNode {
-			return '$it.ident ( ) '
+			return '$it.ident ( )'
 		}
 	}
 }
@@ -141,10 +156,16 @@ fn test_for_parsing() {
 
 fn test_func_parsing() {
 	inputs := [
-		'fn func1(x) {return 1}',
+		'fn func0() {}',
+		'fn func1(a int) { b:=a }',
+		'fn func2() int {return 1}',
+		'fn func3(x int) int {return x+3}',
 	]
 	expecting := [
-		'fn func1 ( x ) { return 1 }',
+		'fn func0 ( ) { }',
+		'fn func1 ( a int ) { b := a }',
+		'fn func2 ( ) int { return 1 }',
+		'fn func3 ( x int ) int { return x + 3 }',
 	]
 	for i, input in inputs {
 		tok := token.tokenize(input)

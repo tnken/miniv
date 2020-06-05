@@ -108,16 +108,16 @@ fn (mut cg Cgen) gen(node parser.Node) {
 			println('  pop %rax')
 			println('  cmp $0, %rax')
 			if it.has_alternative {
-				println('  je LELSE${cg.label_seq}')
+				println('  je .LELSE${cg.label_seq}')
 				cg.gen(it.consequence)
-				println('  jmp LEND${cg.label_seq}')
-				println('LELSE${cg.label_seq}:')
+				println('  jmp .LEND${cg.label_seq}')
+				println('.LELSE${cg.label_seq}:')
 				cg.gen(it.alternative)
 			} else {
-				println('  je LEND${cg.label_seq}')
+				println('  je .LEND${cg.label_seq}')
 				cg.gen(it.consequence)
 			}
-			println('LEND${cg.label_seq}:')
+			println('.LEND${cg.label_seq}:')
 			cg.label_seq++
 			return
 		}
@@ -125,24 +125,24 @@ fn (mut cg Cgen) gen(node parser.Node) {
 			if it.is_cstyle {
 				cg.gen(it.init)
 				println('  pop %rax')
-				println('LSTART$cg.label_seq:')
+				println('.LSTART$cg.label_seq:')
 				cg.gen(it.condition)
 				println('  pop %rax')
 				println('  cmp $0, %rax')
-				println('  je LEND${cg.label_seq}')
+				println('  je .LEND${cg.label_seq}')
 				cg.gen(it.consequence)
 				cg.gen(it.increment)
-				println('  jmp LSTART$cg.label_seq')
-				println('LEND$cg.label_seq:')
+				println('  jmp .LSTART$cg.label_seq')
+				println('.LEND$cg.label_seq:')
 			} else {
-				println('LSTART$cg.label_seq:')
+				println('.LSTART$cg.label_seq:')
 				cg.gen(it.condition)
 				println('  pop %rax')
 				println('  cmp $0, %rax')
-				println('  je LEND$cg.label_seq')
+				println('  je .LEND$cg.label_seq')
 				cg.gen(it.consequence)
-				println('  jmp LSTART$cg.label_seq')
-				println('LEND$cg.label_seq:')
+				println('  jmp .LSTART$cg.label_seq')
+				println('.LEND$cg.label_seq:')
 			}
 			cg.label_seq++
 			return
@@ -155,6 +155,7 @@ fn (mut cg Cgen) gen(node parser.Node) {
 			return
 		}
 		parser.FuncNode {
+			println('')
 			println('$it.name:')
 			prologue()
 			// TODO: extend the number of argument
