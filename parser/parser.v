@@ -2,34 +2,17 @@ module parser
 
 import token
 
-pub fn (p &Parser) get_lvar_offset(name string) int {
-	mut l := p.head_lvar
-	for {
-		if l.name == name {
-			return l.offset
-		}
-		if l.next == 0 {
-			break
-		}
-		l = l.next
-	}
-	panic('Error: can not find local variable')
-}
-
 struct Parser {
 pub mut:
 	token     token.Token
 	program   []Node
-	head_lvar &Lvar
-	tail_lvar &Lvar
+	table Table
 }
 
 pub fn new_parser(tk token.Token) &Parser {
-	l := &Lvar{'', 0, 0}
 	return &Parser{
 		token: tk
-		head_lvar: l
-		tail_lvar: l
+		table: &Table{}
 	}
 }
 
@@ -213,9 +196,8 @@ fn (p &Parser) primary() Node {
 			}
 			return fnode
 		} else {
-			p.tail_lvar.next = new_lvar(ident.str, p.tail_lvar.offset + 8)
-			p.tail_lvar = p.tail_lvar.next
-			node := new_lvar_node(ident.str, p.tail_lvar.offset + 8)
+			lvar := p.table.enter_lvar(ident.str)
+			node := new_lvar_node(lvar.name, lvar.offset)
 			return node
 		}
 	}

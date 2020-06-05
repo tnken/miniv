@@ -56,7 +56,7 @@ fn (cg Cgen) gen_lvar(node parser.Node) {
 	match node {
 		parser.LvarNode {
 			println('  mov %rbp, %rax')
-			offset := cg.p.get_lvar_offset(it.str)
+			offset := cg.p.table.lvar[it.str].offset
 			println('  sub $$offset, %rax')
 			println('  push %rax')
 		}
