@@ -132,7 +132,7 @@ fn test_for() {
 fn test_files() {
 	dir := './test'
 	input_paths := os.walk_ext(dir, '_input.vv')
-	for input_path in input_paths {
+	for i, input_path in input_paths {
 		source := os.read_file(input_path.trim_space()) or {
 			println('Failed to open $input_path')
 			return
@@ -148,6 +148,7 @@ fn test_files() {
 			println('Failed to open $expect_file')
 			return
 		}
+		println('[${i+1}/${input_paths.len}] assert $input_path == $expect_file')
 		assert expecting == output
 	}
 }

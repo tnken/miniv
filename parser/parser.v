@@ -28,6 +28,7 @@ fn (p &Parser) program() []Node {
 
 fn (p &Parser) stmt() Node {
 	if p.token.consume('fn') {
+		p.table = &Table{}
 		name := p.token.expect_ident()
 		p.token.expect('(')
 		mut args := []Node{}
@@ -194,9 +195,14 @@ fn (p &Parser) primary() Node {
 			}
 			return fnode
 		} else {
-			lvar := p.table.enter_lvar(ident.str)
-			node := new_lvar_node(lvar.name, lvar.offset)
-			return node
+			if p.table.search_lvar(ident.str) {
+				node := new_lvar_node(ident.str, p.table.lvar[ident.str].offset)
+				return node
+			} else {
+				lvar := p.table.enter_lvar(ident.str)
+				node := new_lvar_node(lvar.name, lvar.offset)
+				return node
+			}
 		}
 	}
 	return new_num_node(p.token.expect_number())
