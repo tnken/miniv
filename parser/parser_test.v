@@ -2,7 +2,7 @@ module parser
 
 import token
 
-fn sequence(node Node) string {
+fn seq(node Node) string {
 	match node {
 		NumNode {
 			return it.val.str()
@@ -15,63 +15,63 @@ fn sequence(node Node) string {
 			}
 		}
 		ReturnNode {
-			return 'return ${sequence(it.rhs)}'
+			return 'return ${seq(it.rhs)}'
 		}
 		AssignNode {
-			l := sequence(it.lhs)
-			r := sequence(it.rhs)
+			l := seq(it.lhs)
+			r := seq(it.rhs)
 			return '$l := $r'
 		}
 		DeclareNode {
-			l := sequence(it.lhs)
-			r := sequence(it.rhs)
+			l := seq(it.lhs)
+			r := seq(it.rhs)
 			return '$l = $r'
 		}
 		InfixNode {
-			l := sequence(it.lhs)
-			r := sequence(it.rhs)
+			l := seq(it.lhs)
+			r := seq(it.rhs)
 			return '$l $it.str $r'
 		}
 		IfNode {
-			cd := sequence(it.condition)
-			cs := sequence(it.consequence)
+			cd := seq(it.condition)
+			cs := seq(it.consequence)
 			if it.has_alternative {
-				alt := sequence(it.alternative)
+				alt := seq(it.alternative)
 				return 'if $cd $cs else $alt'
 			}
 			return 'if $cd $cs'
 		}
 		ForNode {
 			if it.is_cstyle {
-				ini := sequence(it.init)
-				cd := sequence(it.condition)
-				inc := sequence(it.increment)
-				cs := sequence(it.consequence)
+				ini := seq(it.init)
+				cd := seq(it.condition)
+				inc := seq(it.increment)
+				cs := seq(it.consequence)
 				return 'for $ini ; $cd ; $inc $cs'
 			}
-			cd := sequence(it.condition)
-			cs := sequence(it.consequence)
+			cd := seq(it.condition)
+			cs := seq(it.consequence)
 			return 'for $cd $cs'
 		}
 		BlockNode {
 			if it.stmts.len > 0 {
 				mut str := '{ '
 				for stmt in it.stmts[..(it.stmts.len - 1)] {
-					str += sequence(stmt) + ' '
+					str += seq(stmt) + ' '
 				}
-				str += sequence(it.stmts[it.stmts.len - 1])
+				str += seq(it.stmts[it.stmts.len - 1])
 				return str + ' }'
 			}
 			return '{ }'
 		}
 		FuncNode {
-			block := sequence(it.block)
+			block := seq(it.block)
 			// TODO: to fix more briefly
 			if it.args.len > 0 && it.has_return {
-				arg := sequence(it.args[0])
+				arg := seq(it.args[0])
 				return 'fn $it.name ( $arg ) $it.return_type.name $block'
 			} else if it.args.len > 0 && !it.has_return {
-				arg := sequence(it.args[0])
+				arg := seq(it.args[0])
 				return 'fn $it.name ( $arg ) $block'
 			}
 			if it.has_return {
@@ -121,11 +121,10 @@ fn test_parser() {
 	]
 	for i, input in inputs {
 		tok := token.tokenize(input)
-		p := parser.new_parser(tok)
-		p.parse()
-		mut out := sequence(p.program[0])
+		p := parse(tok)
+		mut out := seq(p.program[0])
 		for node in p.program[1..] {
-			out += ' ' + sequence(node)
+			out += ' ' + seq(node)
 		}
 		assert out == expecting[i]
 	}
@@ -144,11 +143,10 @@ fn test_for_parsing() {
 	]
 	for i, input in inputs {
 		tok := token.tokenize(input)
-		p := parser.new_parser(tok)
-		p.parse()
-		mut out := sequence(p.program[0])
+		p := parse(tok)
+		mut out := seq(p.program[0])
 		for node in p.program[1..] {
-			out += ' ' + sequence(node)
+			out += ' ' + seq(node)
 		}
 		assert out == expecting[i]
 	}
@@ -169,11 +167,10 @@ fn test_func_parsing() {
 	]
 	for i, input in inputs {
 		tok := token.tokenize(input)
-		p := parser.new_parser(tok)
-		p.parse()
-		mut out := sequence(p.program[0])
+		p := parse(tok)
+		mut out := seq(p.program[0])
 		for node in p.program[1..] {
-			out += ' ' + sequence(node)
+			out += ' ' + seq(node)
 		}
 		assert out == expecting[i]
 	}

@@ -9,15 +9,13 @@ pub mut:
 	table Table
 }
 
-pub fn new_parser(tk token.Token) &Parser {
-	return &Parser{
+pub fn parse(tk token.Token) &Parser {
+	p := &Parser{
 		token: tk
 		table: &Table{}
 	}
-}
-
-pub fn (p &Parser) parse() {
 	p.program = p.program()
+	return p
 }
 
 fn (p &Parser) program() []Node {

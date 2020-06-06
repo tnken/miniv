@@ -11,7 +11,6 @@ fn main() {
 		return
 	}
 	tok := token.tokenize(os.args[1])
-	p := parser.new_parser(tok)
-	p.parse()
+	p := parser.parse(tok)
 	codegen.gen_program(p)
 }
