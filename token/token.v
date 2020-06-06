@@ -196,7 +196,7 @@ pub fn tokenize(input string) &Token {
 		if should_continue {
 			continue
 		}
-		if sc.ch.str() in '+-*/()<>=;{},' {
+		if sc.ch.str() in '+-*/()<>=;{},[]' {
 			cur = new_token(.reserved, cur, sc.ch.str())
 			sc.scan_advance(1)
 			continue

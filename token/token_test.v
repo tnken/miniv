@@ -16,6 +16,18 @@ fn assert_token(expected ET, tk Token) {
 	}
 }
 
+fn exec_test(input []string, expecting [][]ET) {
+	for idx, s in input {
+		mut tk := tokenize(s)
+		mut i := 0
+		for tk.kind != .eof {
+			expected := expecting[idx][i++]
+			assert_token(expected, tk)
+			tk = tk.next
+		}
+	}
+}
+
 fn test_calc_tokenize() {
 	input := [
 		' 11   ',
@@ -165,15 +177,7 @@ fn test_calc_tokenize() {
 			ET{.eof}
 		]
 	]
-	for idx, s in input {
-		mut tk := tokenize(s)
-		mut i := 0
-		for tk.kind != .eof {
-			expected := expecting[idx][i++]
-			assert_token(expected, tk)
-			tk = tk.next
-		}
-	}
+	exec_test(input, expecting)
 }
 
 fn test_if_tokenize() {
@@ -204,15 +208,7 @@ fn test_if_tokenize() {
 			ET{.eof}
 		]
 	]
-	for i, input in inputs {
-		mut tk := tokenize(input)
-		mut j := 0
-		for tk.kind != .eof {
-			expected := expecting[i][j++]
-			assert_token(expected, tk)
-			tk = tk.next
-		}
-	}
+	exec_test(inputs, expecting)
 }
 
 fn test_for_tokenize() {
@@ -238,15 +234,7 @@ fn test_for_tokenize() {
 			ET{.eof}
 		]
 	]
-	for i, input in inputs {
-		mut tok := tokenize(input)
-		mut j := 0
-		for tok.kind != .eof {
-			expected := expecting[i][j++]
-			assert_token(expected, tok)
-			tok = tok.next
-		}
-	}
+	exec_test(inputs, expecting)
 }
 
 fn test_block_tokenize() {
@@ -268,15 +256,7 @@ fn test_block_tokenize() {
 			ET{.eof}
 		]
 	]
-	for i, input in inputs {
-		mut tok := token.tokenize(input)
-		mut j := 0
-		for tok.kind != .eof {
-			expected := expecting[i][j++]
-			assert_token(expected, tok)
-			tok = tok.next
-		}
-	}
+	exec_test(inputs, expecting)
 }
 
 fn test_fn_tokenize() {
@@ -313,13 +293,5 @@ fn test_fn_tokenize() {
 			ET{.eof}
 		]
 	]
-	for i, input in inputs {
-		mut tok := token.tokenize(input)
-		mut j := 0
-		for tok.kind != .eof {
-			expected := expecting[i][j++]
-			assert_token(expected, tok)
-			tok = tok.next
-		}
-	}
+	exec_test(inputs, expecting)
 }
