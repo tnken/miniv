@@ -12,7 +12,7 @@ pub mut:
 pub fn parse(tk token.Token) &Parser {
 	p := &Parser{
 		token: tk
-		table: &Table{}
+		table: &Table{latest_lvar: &Lvar{}}
 	}
 	p.program = p.program()
 	return p
@@ -28,7 +28,7 @@ fn (p &Parser) program() []Node {
 
 fn (p &Parser) stmt() Node {
 	if p.token.consume('fn') {
-		p.table = &Table{}
+		p.table = &Table{latest_lvar: &Lvar{}}
 		name := p.token.expect_ident()
 		p.token.expect('(')
 		mut args := []Node{}
@@ -112,7 +112,9 @@ fn (p &Parser) assign() Node {
 		LvarNode {
 			if p.token.consume(':=') {
 				rhs := p.assign()
-				it.lvar.typ = rhs.typ_kind()
+				if rhs is ArrayNode {
+					it.lvar.len = rhs.length()
+				}
 				node = new_assign_node(node, rhs)
 			} else if p.token.consume('=') {
 				rhs := p.assign()
@@ -197,6 +199,18 @@ fn (p &Parser) primary() Node {
 		p.token.expect(')')
 		return node
 	}
+	if p.token.consume('['){
+		mut elements := []Node{}
+		if !p.token.consume(']') {
+			for {
+				ele := p.equality()
+				elements << ele
+				if p.token.consume(']') { break }
+				p.token.expect(',')
+			}
+		}
+		return new_array_node(elements)
+	}
 	if p.token.kind == .ident {
 		ident := p.token
 		p.token.next_token()
@@ -208,12 +222,16 @@ fn (p &Parser) primary() Node {
 			return fnode
 		} else {
 			if p.table.search_lvar(ident.str) {
-				node := new_lvar_node(ident.str, &p.table.lvar[ident.str])
+				mut node := new_lvar_node(ident.str, &p.table.lvar[ident.str], false, Node{})
+				if p.token.consume('[') {
+					node = new_lvar_node(ident.str, &p.table.lvar[ident.str], true, p.equality())
+					p.token.expect(']')
+				}
 				return node
 			} else {
 				// TODO: lvar handling is little complex, fix them more simply.
 				lvar := p.table.enter_lvar(ident.str)
-				node := new_lvar_node(lvar.name, lvar)
+				node := new_lvar_node(ident.str, lvar, false, Node{})
 				return node
 			}
 		}

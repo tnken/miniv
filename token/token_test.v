@@ -295,3 +295,26 @@ fn test_fn_tokenize() {
 	]
 	exec_test(inputs, expecting)
 }
+
+fn test_array_tokenize() {
+	inputs := [
+		'a := [1,2,3,4]'
+	]
+	expecting := [
+		[
+			ET{.ident, 0, 'a'},
+			ET{.reserved, 0, ':='},
+			ET{.reserved, 0, '['},
+			ET{.num, 1, ''},
+			ET{.reserved, 0, ','},
+			ET{.num, 2, ''},
+			ET{.reserved, 0, ','},
+			ET{.num, 3, ''},
+			ET{.reserved, 0, ','},
+			ET{.num, 4, ''},
+			ET{.reserved, 0, ']'},
+			ET{.eof}
+		]
+	]
+	exec_test(inputs, expecting)
+}

@@ -52,12 +52,22 @@ fn (mut cg Cgen) gen_print(node parser.FuncCallNode) {
 	println('  push %rax')
 }
 
-fn (cg Cgen) gen_lvar(node parser.Node) {
+fn (mut cg Cgen) gen_lvar(node parser.Node) {
 	match node {
 		parser.LvarNode {
+			if it.array_access {
+				cg.gen(it.access_offset)
+				println('  pop %rax')
+				println('  mov $8, %rbx')
+				println('  mul %rbx')
+				println('  add $${it.lvar.offset}, %rax')
+				println('  mov %rbp, %rbx')
+				println('  sub %rax, %rbx')
+				println('  push %rbx')
+				return
+			}
 			println('  mov %rbp, %rax')
-			offset := it.lvar.offset
-			println('  sub $$offset, %rax')
+			println('  sub $${it.lvar.offset}, %rax')
 			println('  push %rax')
 		}
 		else {
@@ -86,13 +96,29 @@ fn (mut cg Cgen) gen(node parser.Node) {
 			return
 		}
 		parser.AssignNode {
-			cg.gen_lvar(it.lhs)
-			cg.gen(it.rhs)
-			println('  pop %rdi')
-			println('  pop %rax')
-			println('  mov %rdi, (%rax)')
-			println('  push %rdi')
-			return
+			if it.rhs is parser.ArrayNode {
+				ln := it.lhs.convert_to_lvar()
+				cg.gen_lvar(it.lhs)
+				println('  pop %rax')
+			    cg.gen(it.rhs)
+				for i:=0; i < ln.lvar.len; i++ {
+					if i > 0 {
+						println('  sub $8, %rax')
+					}
+					println('  pop %rdi')
+					println('  mov %rdi, (%rax)')
+				}
+				println('  push %rdi')
+				return
+			} else {
+				cg.gen_lvar(it.lhs)
+			    cg.gen(it.rhs)
+				println('  pop %rdi')
+				println('  pop %rax')
+				println('  mov %rdi, (%rax)')
+				println('  push %rdi')
+				return
+			}
 		}
 		parser.DeclareNode {
 			cg.gen_lvar(it.lhs)
@@ -223,6 +249,15 @@ fn (mut cg Cgen) gen(node parser.Node) {
 				}
 			}
 			println('  push %rax')
+		}
+		parser.ArrayNode {
+			match it.ele_typ {
+				.typ_int {
+					for ele in it.elements.reverse() {
+						cg.gen(ele)
+					}
+				} else {}
+			}
 		}
 	}
 }

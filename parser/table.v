@@ -3,7 +3,7 @@ module parser
 struct Table {
 pub mut:
 	lvar map[string]Lvar
-	latest_lvar Lvar
+	latest_lvar &Lvar
 }
 
 struct Lvar {
@@ -11,8 +11,8 @@ pub:
 	name   string
 	offset int
 	is_array bool
-	len int
-mut:
+pub mut:
+	len int = 1
 	typ TypeKind
 }
 
@@ -37,13 +37,14 @@ fn type_str(tk TypeKind) string {
 }
 
 fn (t &Table) next_offset() int {
-	return t.latest_lvar.offset + 8
+	return t.latest_lvar.offset + (8 * t.latest_lvar.len)
 }
 
 fn (t &Table) enter_lvar(name string) &Lvar {
 	lvar := Lvar{name: name, offset: t.next_offset()}
 	t.lvar[name] = lvar
-	t.latest_lvar = lvar
+	// TODO: little complex. not to use pointer
+	t.latest_lvar = &t.lvar[name]
 	return &t.lvar[name]
 }
 

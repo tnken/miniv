@@ -29,6 +29,16 @@ fn fib2(x int) int {
 	return b
 }
 
+fn fib3(y int) int {
+	a := [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+	for i:=2; i<11; i = i+1 {
+		a[i] = a[i-1] + a[i-2]
+	}
+
+	return a[y-1]
+}
+
 fn main() {
 	println(fib1(1))
 	println(fib1(2))
@@ -53,4 +63,16 @@ fn main() {
 	println(fib2(9))
 	println(fib2(10))
 	println(fib2(11))
+
+	println(fib3(1))
+	println(fib3(2))
+	println(fib3(3))
+	println(fib3(4))
+	println(fib3(5))
+	println(fib3(6))
+	println(fib3(7))
+	println(fib3(8))
+	println(fib3(9))
+	println(fib3(10))
+	println(fib3(11))
 }

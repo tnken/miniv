@@ -66,7 +66,7 @@ fn seq(node Node) string {
 		}
 		FuncNode {
 			block := seq(it.block)
-			// TODO: to fix more briefly
+			// TODO: fix more briefly
 			if it.has_return {
 				if it.args.len > 0 {
 					arg := seq(it.args[0])
@@ -85,6 +85,18 @@ fn seq(node Node) string {
 		}
 		FuncCallNode {
 			return '$it.ident ( )'
+		}
+		ArrayNode {
+			match it.ele_typ {
+				.typ_int {
+					mut s := '[ '
+					for i, ele in it.elements {
+						if i > 0 { s += ' , ' }
+						s += seq(ele)
+					}
+					s += ' ]'
+				} else {}
+			}
 		}
 	}
 }
@@ -167,6 +179,26 @@ fn test_func_parsing() {
 		'fn func1 ( a int ) { b := a }',
 		'fn func2 ( ) int { return 1 }',
 		'fn func3 ( x int ) int { return x + 3 }',
+	]
+	for i, input in inputs {
+		tok := token.tokenize(input)
+		p := parse(tok)
+		mut out := seq(p.program[0])
+		for node in p.program[1..] {
+			out += ' ' + seq(node)
+		}
+		assert out == expecting[i]
+	}
+}
+
+fn test_array_parsing() {
+	inputs := [
+		'a := [1,2,3]',
+		'b := [1+3-2,2,3]',
+	]
+	expecting := [
+		'a := [ 1 , 2 , 3 ]',
+		'b := [ 1 + 3 - 2 , 2 , 3 ]'
 	]
 	for i, input in inputs {
 		tok := token.tokenize(input)
