@@ -9,7 +9,7 @@ fn seq(node Node) string {
 		}
 		LvarNode {
 			if it.is_arg {
-				return '$it.str $it.typ.name'
+				return '$it.str ${type_str(it.lvar.typ)}'
 			} else {
 				return it.str
 			}
@@ -67,17 +67,20 @@ fn seq(node Node) string {
 		FuncNode {
 			block := seq(it.block)
 			// TODO: to fix more briefly
-			if it.args.len > 0 && it.has_return {
-				arg := seq(it.args[0])
-				return 'fn $it.name ( $arg ) $it.return_type.name $block'
-			} else if it.args.len > 0 && !it.has_return {
-				arg := seq(it.args[0])
-				return 'fn $it.name ( $arg ) $block'
-			}
 			if it.has_return {
-				return 'fn $it.name ( ) $it.return_type.name $block'
+				if it.args.len > 0 {
+					arg := seq(it.args[0])
+					return 'fn $it.name ( $arg ) ${type_str(it.return_type)} $block'
+				} else {
+					return 'fn $it.name ( ) ${type_str(it.return_type)} $block'
+				}
 			} else {
-				return 'fn $it.name ( ) $block'
+				if it.args.len > 0 {
+					arg := seq(it.args[0])
+					return 'fn $it.name ( $arg ) $block'
+				} else {
+					return 'fn $it.name ( ) $block'
+				}
 			}
 		}
 		FuncCallNode {

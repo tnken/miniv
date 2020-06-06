@@ -6,7 +6,7 @@ struct Parser {
 pub mut:
 	token     token.Token
 	program   []Node
-	table Table
+	table &Table
 }
 
 pub fn parse(tk token.Token) &Parser {
@@ -38,8 +38,8 @@ fn (p &Parser) stmt() Node {
 				match lvar {
 					LvarNode {
 						tp := p.token.expect_primitive_type()
-						it.typ = new_type(tp)
 						it.is_arg = true
+						it.lvar.typ = type_kind(tp)
 						args << lvar
 					} else {}
 				}
@@ -47,25 +47,25 @@ fn (p &Parser) stmt() Node {
 				p.token.expect(',')
 			}
 		}
-		mut has_return := false
-		mut typ := Type{}
 		if p.token.str != '{' {
 			tp := p.token.expect_primitive_type()
-			typ = new_type(tp)
-			has_return = true
+			block := p.stmt()
+			mut node := new_func_node(name, block, true)
+			node.return_type = type_kind(tp)
+			node.args = args
+			return node
+		} else {
+			block := p.stmt()
+			mut node := new_func_node(name, block, false)
+			node.args = args
+			return node
 		}
-		block := p.stmt()
-		mut fnode := new_func_node(name, block)
-		fnode.has_return = has_return
-		if has_return {
-			fnode.return_type = typ
-		}
-		fnode.args = args
-		return fnode
 	}
+
 	if p.token.consume('return') {
 		return new_return_node(p.equality())
 	}
+
 	if p.token.consume('if') {
 		exp := p.expr()
 		con := p.stmt()
@@ -75,6 +75,7 @@ fn (p &Parser) stmt() Node {
 		}
 		return new_if_node(exp, con)
 	}
+
 	if p.token.consume('for') {
 		exp := p.expr()
 		if p.token.consume(';') {
@@ -87,6 +88,7 @@ fn (p &Parser) stmt() Node {
 		cons := p.stmt()
 		return new_for_node(exp, cons)
 	}
+
 	if p.token.consume('{') {
 		mut stmts := []Node{}
 		for !p.token.consume('}') {
@@ -106,12 +108,22 @@ fn (p &Parser) expr() Node {
 fn (p &Parser) assign() Node {
 	mut node := p.equality()
 	// TODO: divide roles of := and =
-	if p.token.consume(':=') {
-		node = new_assign_node(node, p.assign())
-	} else if p.token.consume('=') {
-		node = new_declare_node(node, p.assign())
+	match node {
+		LvarNode {
+			if p.token.consume(':=') {
+				rhs := p.assign()
+				it.lvar.typ = rhs.typ_kind()
+				node = new_assign_node(node, rhs)
+			} else if p.token.consume('=') {
+				rhs := p.assign()
+				it.lvar.typ = rhs.typ_kind()
+				node = new_declare_node(node, rhs)
+			}
+			return node
+		} else {
+			return node
+		}
 	}
-	return node
 }
 
 fn (p &Parser) equality() Node {
@@ -196,11 +208,12 @@ fn (p &Parser) primary() Node {
 			return fnode
 		} else {
 			if p.table.search_lvar(ident.str) {
-				node := new_lvar_node(ident.str, p.table.lvar[ident.str].offset)
+				node := new_lvar_node(ident.str, &p.table.lvar[ident.str])
 				return node
 			} else {
+				// TODO: lvar handling is little complex, fix them more simply.
 				lvar := p.table.enter_lvar(ident.str)
-				node := new_lvar_node(lvar.name, lvar.offset)
+				node := new_lvar_node(lvar.name, lvar)
 				return node
 			}
 		}

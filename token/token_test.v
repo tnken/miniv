@@ -1,6 +1,6 @@
 module token
 
-// ExpectedToken
+// ExpectToken
 struct ET {
 	kind TokenKind
 	val  int

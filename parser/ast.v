@@ -38,13 +38,12 @@ fn new_num_node(val int) Node {
 struct LvarNode {
 pub mut:
 	str    string
-	offset int
-	typ Type
 	is_arg bool
+	lvar &Lvar
 }
 
-fn new_lvar_node(str string, offset int) Node {
-	return LvarNode{str, offset, Type{}, false}
+fn new_lvar_node(str string, lvar &Lvar) Node {
+	return LvarNode{str, false, lvar}
 }
 
 struct AssignNode {
@@ -141,18 +140,20 @@ fn new_block_node(stmts []Node) BlockNode {
 }
 
 struct FuncNode {
-pub mut:
+pub:
 	name string
-	args []Node
 	block Node
 	has_return bool
-	return_type Type
+pub mut:
+	args []Node
+	return_type TypeKind
 }
 
-fn new_func_node(name string, block Node) FuncNode {
+fn new_func_node(name string, block Node, has_return bool) FuncNode {
 	return FuncNode {
 		name: name
 		block: block
+		has_return: has_return
 	}
 }
 
@@ -165,5 +166,14 @@ pub mut:
 fn new_func_call_node(ident string) FuncCallNode {
 	return FuncCallNode {
 		ident: ident
+	}
+}
+
+fn (n Node) typ_kind() TypeKind {
+	match n {
+		InfixNode { return .typ_int }
+		NumNode{ return .typ_int }
+		LvarNode { return it.lvar.typ }
+		else {}
 	}
 }
