@@ -48,7 +48,7 @@ fn new_lvar_node(str string, lvar &Lvar, array_acc bool, acc_offset Node) Node {
 	return LvarNode{str, false, lvar, array_acc, acc_offset}
 }
 
-pub fn (n Node) convert_to_lvar() LvarNode{
+pub fn lvar_node(n Node) LvarNode {
 	match n {
 		LvarNode {
 			return it

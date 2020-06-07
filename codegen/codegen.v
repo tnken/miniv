@@ -97,7 +97,7 @@ fn (mut cg Cgen) gen(node parser.Node) {
 		}
 		parser.AssignNode {
 			if it.rhs is parser.ArrayNode {
-				ln := it.lhs.convert_to_lvar()
+				ln := parser.lvar_node(it.lhs)
 				cg.gen_lvar(it.lhs)
 				println('  pop %rax')
 			    cg.gen(it.rhs)

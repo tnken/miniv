@@ -121,17 +121,17 @@ pub fn (t &Token) expect_number() int {
 	return val
 }
 
-fn primitive_types() []string {
-	return ['int']
+fn is_type_name(s string) bool {
+	return s in ['int']
 }
 
-pub fn (t &Token) expect_primitive_type() string {
-	if t.kind != .reserved || !(t.str in primitive_types()) {
+pub fn (t &Token) expect_type_name() string {
+	if t.kind != .reserved || !(is_type_name(t.str)) {
 		panic('error: not expected type')
 	}
-	str := t.str
+	s := t.str
 	t.next_token()
-	return str
+	return s
 }
 
 pub fn tokenize(input string) &Token {
@@ -145,12 +145,19 @@ pub fn tokenize(input string) &Token {
 			continue
 		}
 		mut should_continue := false
-		for t in primitive_types() {
-			if sc.pos < sc.input.len - (t.len - 1) {
-				target := sc.input[sc.pos..sc.pos + t.len]
-				if target == t {
-					cur = new_token(.reserved, cur, t)
-					sc.scan_advance(t.len)
+		operators := [
+			'==',
+			'!=',
+			'<=',
+			'>=',
+			':='
+		]
+		for op in operators {
+			if sc.pos < sc.input.len - (op.len - 1) {
+				target := sc.input[sc.pos..sc.pos + op.len]
+				if target == op {
+					cur = new_token(.reserved, cur, op)
+					sc.scan_advance(op.len)
 					should_continue = true
 					break
 				}
@@ -159,35 +166,29 @@ pub fn tokenize(input string) &Token {
 		if should_continue {
 			continue
 		}
-		operators := ['==', '!=', '<=', '>=', ':=']
-		for o in operators {
-			if sc.pos < sc.input.len - (o.len - 1) {
-				target := sc.input[sc.pos..sc.pos + o.len]
-				if target == o {
-					cur = new_token(.reserved, cur, o)
-					sc.scan_advance(o.len)
-					should_continue = true
-					break
-				}
-			}
-		}
-		if should_continue {
-			continue
-		}
-		keywords := ['if', 'for', 'else', 'return', 'fn']
-		for k in keywords {
-			if sc.pos < sc.input.len - (k.len - 1) {
-				target := sc.input[sc.pos..sc.pos + k.len]
+
+		keywords := [
+			'if',
+			'for',
+			'else',
+			'return',
+			'fn',
+			'int',
+			'string'
+		]
+		for key in keywords {
+			if sc.pos < sc.input.len - (key.len - 1) {
+				target := sc.input[sc.pos..sc.pos + key.len]
 				mut is_lvar := false
-				if sc.pos + k.len < sc.input.len {
-					if is_alnum(sc.input[sc.pos + k.len]) {
+				if sc.pos + key.len < sc.input.len {
+					if is_alnum(sc.input[sc.pos + key.len]) {
 						// ex. iflvar := 3
 						is_lvar = true
 					}
 				}
-				if target == k && !is_lvar {
-					cur = new_token(.reserved, cur, k)
-					sc.scan_advance(k.len)
+				if target == key && !is_lvar {
+					cur = new_token(.reserved, cur, key)
+					sc.scan_advance(key.len)
 					should_continue = true
 					break
 				}
@@ -196,6 +197,7 @@ pub fn tokenize(input string) &Token {
 		if should_continue {
 			continue
 		}
+
 		if sc.ch.str() in '+-*/()<>=;{},[]' {
 			cur = new_token(.reserved, cur, sc.ch.str())
 			sc.scan_advance(1)

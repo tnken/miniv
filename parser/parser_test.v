@@ -101,6 +101,18 @@ fn seq(node Node) string {
 	}
 }
 
+fn exec_test(inputs []string, expecting []string) {
+	for i, input in inputs {
+		tok := token.tokenize(input)
+		p := parse(tok)
+		mut out := seq(p.program[0])
+		for node in p.program[1..] {
+			out += ' ' + seq(node)
+		}
+		assert out == expecting[i]
+	}
+}
+
 fn test_parser() {
 	inputs := [
 		'1+2',
@@ -134,15 +146,7 @@ fn test_parser() {
 		'if 1 + 1 - 1 3 + 3',
 		'if 0 + 1 return 2 else return 3'
 	]
-	for i, input in inputs {
-		tok := token.tokenize(input)
-		p := parse(tok)
-		mut out := seq(p.program[0])
-		for node in p.program[1..] {
-			out += ' ' + seq(node)
-		}
-		assert out == expecting[i]
-	}
+	exec_test(inputs, expecting)
 }
 
 fn test_for_parsing() {
@@ -156,15 +160,7 @@ fn test_for_parsing() {
 		'a := 0 for i := 0 ; i < 10 ; i = i + 1 a = a + 1 a',
 		'a := 1 for a < 10 { a = a + 1 a = a + 1 } a'
 	]
-	for i, input in inputs {
-		tok := token.tokenize(input)
-		p := parse(tok)
-		mut out := seq(p.program[0])
-		for node in p.program[1..] {
-			out += ' ' + seq(node)
-		}
-		assert out == expecting[i]
-	}
+	exec_test(inputs, expecting)
 }
 
 fn test_func_parsing() {
@@ -180,15 +176,7 @@ fn test_func_parsing() {
 		'fn func2 ( ) int { return 1 }',
 		'fn func3 ( x int ) int { return x + 3 }',
 	]
-	for i, input in inputs {
-		tok := token.tokenize(input)
-		p := parse(tok)
-		mut out := seq(p.program[0])
-		for node in p.program[1..] {
-			out += ' ' + seq(node)
-		}
-		assert out == expecting[i]
-	}
+	exec_test(inputs, expecting)
 }
 
 fn test_array_parsing() {
@@ -200,13 +188,5 @@ fn test_array_parsing() {
 		'a := [ 1 , 2 , 3 ]',
 		'b := [ 1 + 3 - 2 , 2 , 3 ]'
 	]
-	for i, input in inputs {
-		tok := token.tokenize(input)
-		p := parse(tok)
-		mut out := seq(p.program[0])
-		for node in p.program[1..] {
-			out += ' ' + seq(node)
-		}
-		assert out == expecting[i]
-	}
+	exec_test(inputs, expecting)
 }

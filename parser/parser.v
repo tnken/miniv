@@ -34,21 +34,20 @@ fn (p &Parser) stmt() Node {
 		mut args := []Node{}
 		if !p.token.consume(')') {
 			for {
-				lvar := p.primary()
-				match lvar {
-					LvarNode {
-						tp := p.token.expect_primitive_type()
-						it.is_arg = true
-						it.lvar.typ = type_kind(tp)
-						args << lvar
-					} else {}
+				node := p.primary()
+				if node is LvarNode {
+					mut lvar := lvar_node(node)
+					tp := p.token.expect_type_name()
+					lvar.is_arg = true
+					lvar.lvar.typ = type_kind(tp)
+					args << lvar
 				}
 				if p.token.consume(')') { break }
 				p.token.expect(',')
 			}
 		}
 		if p.token.str != '{' {
-			tp := p.token.expect_primitive_type()
+			tp := p.token.expect_type_name()
 			block := p.stmt()
 			mut node := new_func_node(name, block, true)
 			node.return_type = type_kind(tp)
@@ -108,24 +107,22 @@ fn (p &Parser) expr() Node {
 fn (p &Parser) assign() Node {
 	mut node := p.equality()
 	// TODO: divide roles of := and =
-	match node {
-		LvarNode {
-			if p.token.consume(':=') {
-				rhs := p.assign()
-				if rhs is ArrayNode {
-					it.lvar.len = rhs.length()
-				}
-				node = new_assign_node(node, rhs)
-			} else if p.token.consume('=') {
-				rhs := p.assign()
-				it.lvar.typ = rhs.typ_kind()
-				node = new_declare_node(node, rhs)
+	if node is LvarNode {
+		mut lvar := lvar_node(node)
+		if p.token.consume(':=') {
+			rhs := p.assign()
+			if rhs is ArrayNode {
+				lvar.lvar.len = rhs.length()
 			}
-			return node
-		} else {
-			return node
+			node = new_assign_node(node, rhs)
+		} else if p.token.consume('=') {
+			rhs := p.assign()
+			lvar.lvar.typ = rhs.typ_kind()
+			node = new_declare_node(node, rhs)
 		}
+		return node
 	}
+	return node
 }
 
 fn (p &Parser) equality() Node {
@@ -215,11 +212,11 @@ fn (p &Parser) primary() Node {
 		ident := p.token
 		p.token.next_token()
 		if p.token.consume('('){
-			mut fnode := new_func_call_node(ident.str)
+			mut node := new_func_call_node(ident.str)
 			for !p.token.consume(')'){
-				fnode.args << p.equality()
+				node.args << p.equality()
 			}
-			return fnode
+			return node
 		} else {
 			if p.table.search_lvar(ident.str) {
 				mut node := new_lvar_node(ident.str, &p.table.lvar[ident.str], false, Node{})
