@@ -58,6 +58,7 @@ fn (mut s Scanner) scan_num() int {
 pub enum TokenKind {
 	reserved
 	num
+	text
 	eof
 	ident
 }
@@ -119,6 +120,15 @@ pub fn (t &Token) expect_number() int {
 	val := t.val
 	t.next_token()
 	return val
+}
+
+pub fn (t &Token) expect_text() string {
+	if t.kind != .text {
+		panic('error: not expected operator')
+	}
+	str:= t.str
+	t.next_token()
+	return str
 }
 
 fn is_type_name(s string) bool {
@@ -206,6 +216,16 @@ pub fn tokenize(input string) &Token {
 		if sc.ch.is_digit() {
 			cur = new_token(.num, cur, '')
 			cur.val = sc.scan_num()
+			continue
+		}
+		if sc.ch.str() in '\'' {
+			cur = new_token(.reserved, cur, '\'')
+			sc.scan_advance(1)
+			l := sc.pos
+			for (sc.ch.str() != '\'') && sc.scan_advance(1) {}
+			cur = new_token(.text, cur, sc.input[l..sc.pos])
+			cur = new_token(.reserved, cur, '\'')
+			sc.scan_advance(1)
 			continue
 		}
 		if sc.ch.is_letter() {

@@ -196,7 +196,7 @@ fn (p &Parser) primary() Node {
 		p.token.expect(')')
 		return node
 	}
-	if p.token.consume('['){
+	if p.token.consume('[') {
 		mut elements := []Node{}
 		if !p.token.consume(']') {
 			for {
@@ -207,6 +207,12 @@ fn (p &Parser) primary() Node {
 			}
 		}
 		return new_array_node(elements)
+	}
+	if p.token.consume('\'') {
+		node := new_string_node(p.token.str)
+		p.token.expect_text()
+		p.token.expect('\'')
+		return node
 	}
 	if p.token.kind == .ident {
 		ident := p.token

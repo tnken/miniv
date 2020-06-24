@@ -6,6 +6,8 @@ pub mut:
 	latest_lvar &Lvar
 }
 
+// TODO: refactor local variable management.
+// these are little complex.
 struct Lvar {
 pub:
 	name   string

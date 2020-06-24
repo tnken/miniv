@@ -11,7 +11,7 @@ fn assert_token(expected ET, tk Token) {
 	assert expected.kind == tk.kind
 	if expected.kind == .num {
 		assert expected.val == tk.val
-	} else if expected.kind == .reserved {
+	} else {
 		assert expected.str == tk.str
 	}
 }
@@ -313,6 +313,23 @@ fn test_array_tokenize() {
 			ET{.reserved, 0, ','},
 			ET{.num, 4, ''},
 			ET{.reserved, 0, ']'},
+			ET{.eof}
+		]
+	]
+	exec_test(inputs, expecting)
+}
+
+fn test_string_tokenize() {
+	inputs := [
+		's := \'hello\''
+	]
+	expecting := [
+		[
+			ET{.ident, 0, 's'},
+			ET{.reserved, 0, ':='},
+			ET{.reserved, 0, '\''},
+			ET{.text, 0, 'hello'},
+			ET{.reserved, 0, '\''},
 			ET{.eof}
 		]
 	]

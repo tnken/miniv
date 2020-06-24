@@ -98,6 +98,9 @@ fn seq(node Node) string {
 				} else {}
 			}
 		}
+		StringNode {
+			return '\' $it.text \''
+		}
 	}
 }
 
@@ -187,6 +190,16 @@ fn test_array_parsing() {
 	expecting := [
 		'a := [ 1 , 2 , 3 ]',
 		'b := [ 1 + 3 - 2 , 2 , 3 ]'
+	]
+	exec_test(inputs, expecting)
+}
+
+fn test_strign_parsing() {
+	inputs := [
+		'a := \'hello\''
+	]
+	expecting := [
+		'a := \' hello \''
 	]
 	exec_test(inputs, expecting)
 }

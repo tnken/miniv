@@ -1,7 +1,7 @@
 module parser
 
 type Node = AssignNode | BlockNode | DeclareNode | ForNode | IfNode | InfixNode | LvarNode |
-	NumNode | ReturnNode | FuncNode | FuncCallNode | ArrayNode
+	NumNode | ReturnNode | FuncNode | FuncCallNode | ArrayNode | StringNode
 
 enum InfixKind {
 	add
@@ -211,4 +211,13 @@ fn (n Node) length() int {
 		ArrayNode{ return it.len }
 		else { return 1 }
 	}
+}
+
+struct StringNode {
+	pub mut:
+		text string
+}
+
+fn new_string_node(text string) Node {
+	return StringNode{text}
 }
